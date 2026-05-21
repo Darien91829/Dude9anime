@@ -5,11 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>dude9anime</title>
     <style>
-        /* CSS Variables make theme swapping incredibly easy */
         :root {
             --bg-color: #050505;
             --container-bg: #111111;
-            --accent-color: #00ff66; /* Your signature Green */
+            --accent-color: #00ff66; 
             --text-color: #ffffff;
             --muted-text: #888888;
         }
@@ -24,7 +23,6 @@
             transition: background 0.3s, color 0.3s;
         }
 
-        /* Header Layout with Settings Gear */
         .header-container {
             display: flex;
             justify-content: space-between;
@@ -48,7 +46,6 @@
         }
         p { color: var(--muted-text); margin-top: 0; font-size: 0.9rem; }
         
-        /* Search Box styling */
         .search-box { display: flex; max-width: 500px; margin: 20px auto; gap: 10px; padding: 0 10px; }
         input { flex: 1; padding: 12px; border-radius: 8px; border: 2px solid #222; background: var(--container-bg); color: var(--text-color); font-size: 16px; outline: none; }
         input:focus { border-color: var(--accent-color); }
@@ -58,6 +55,11 @@
         .player-container { max-width: 800px; margin: 20px auto; aspect-ratio: 16/9; background: #000; border-radius: 12px; overflow: hidden; border: 2px solid #222; display: none; }
         iframe { width: 100%; height: 100%; border: none; }
 
+        /* Sub / Dub Toggle Container */
+        .audio-toggle-container { margin: 15px auto; display: none; justify-content: center; gap: 10px; max-width: 800px; }
+        .audio-btn { background: #222; color: #fff; border: 1px solid #444; padding: 6px 16px; border-radius: 20px; font-size: 14px; cursor: pointer; font-weight: bold; }
+        .audio-btn.active { background: var(--accent-color); color: #000; border-color: var(--accent-color); }
+
         /* Dynamic Anime Grid Results */
         .anime-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; max-width: 1000px; margin: 30px auto; padding: 10px; }
         .anime-card { background: var(--container-bg); border-radius: 8px; overflow: hidden; cursor: pointer; transition: transform 0.2s, border-color 0.2s; border: 1px solid #222; text-align: left; }
@@ -66,12 +68,12 @@
         .anime-card .title { padding: 10px; font-size: 0.85rem; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-color); }
 
         /* Dynamic Episode Buttons Box */
-        .episodes-title { margin-top: 30px; display: none; color: var(--accent-color); font-size: 1.2rem; }
+        .episodes-title { margin-top: 20px; display: none; color: var(--accent-color); font-size: 1.2rem; }
         .episode-list { max-width: 800px; margin: 15px auto; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
         .ep-btn { background: var(--container-bg); color: var(--text-color); border: 1px solid #333; padding: 8px 16px; font-size: 14px; border-radius: 6px; cursor: pointer; min-width: 60px; }
         .ep-btn:hover, .ep-btn.active { background: var(--accent-color); color: #000; border-color: var(--accent-color); font-weight: bold; }
 
-        /* Settings Modal (Popup Overlay) */
+        /* Settings Modal */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 100; justify-content: center; align-items: center; }
         .modal-content { background: #151515; border: 2px solid var(--accent-color); padding: 30px; border-radius: 12px; max-width: 300px; width: 80%; text-align: left; position: relative;}
         .close-btn { position: absolute; top: 10px; right: 15px; font-size: 20px; cursor: pointer; color: var(--muted-text); }
@@ -84,7 +86,7 @@
 <body>
 
     <div class="header-container">
-        <h1 id="brand-logo">dude9anime</h1>
+        <h1 id="brand-logo" onclick="location.reload()" style="cursor:pointer;">dude9anime</h1>
         <button class="settings-icon" onclick="toggleModal(true)">⚙️</button>
     </div>
     <p>Your Next Anime Adventure Awaits</p>
@@ -98,6 +100,11 @@
 
     <div id="player-box" class="player-container">
         <iframe id="video-iframe" src="" allowfullscreen scrolling="no"></iframe>
+    </div>
+
+    <div id="audio-toggles" class="audio-toggle-container">
+        <button id="sub-btn" class="audio-btn active" onclick="setLanguage('sub')">SUB</button>
+        <button id="dub-btn" class="audio-btn" onclick="setLanguage('dub')">DUB</button>
     </div>
 
     <h3 id="ep-title" class="episodes-title">Available Episodes</h3>
@@ -135,7 +142,11 @@
         const ANIKOTO_BASE = "https://anikotoapi.site";
         const PLAYER_BASE = "https://megaplay.buzz/stream/s-2";
 
-        // --- Theme Engine Setup ---
+        // State Trackers
+        let currentEpisodesList = [];
+        let currentEpisodeIndex = 0;
+        let currentLanguage = 'sub'; [span_7](start_span)// Default language setting[span_7](end_span)
+
         function toggleModal(show) {
             document.getElementById('settings-modal').style.display = show ? 'flex' : 'none';
         }
@@ -143,25 +154,17 @@
         function saveTheme() {
             const accent = document.getElementById('accent-picker').value;
             const bgMode = document.getElementById('bg-picker').value;
+            let bg = "#050505", container = "#111111";
             
-            let bg = "#050505";
-            let container = "#111111";
-            
-            if (bgMode === "dark-gray") {
-                bg = "#1a1a1e";
-                container = "#252529";
-            }
+            if (bgMode === "dark-gray") { bg = "#1a1a1e"; container = "#252529"; }
 
-            // Apply modifications live
             document.documentElement.style.setProperty('--accent-color', accent);
             document.documentElement.style.setProperty('--bg-color', bg);
             document.documentElement.style.setProperty('--container-bg', container);
 
-            // Save settings to user storage
             localStorage.setItem('dude9anime-accent', accent);
             localStorage.setItem('dude9anime-bg', bg);
             localStorage.setItem('dude9anime-container', container);
-            
             toggleModal(false);
         }
 
@@ -169,17 +172,15 @@
             const savedAccent = localStorage.getItem('dude9anime-accent');
             const savedBg = localStorage.getItem('dude9anime-bg');
             const savedContainer = localStorage.getItem('dude9anime-container');
-
             if (savedAccent) document.documentElement.style.setProperty('--accent-color', savedAccent);
             if (savedBg) document.documentElement.style.setProperty('--bg-color', savedBg);
             if (savedContainer) document.documentElement.style.setProperty('--container-bg', savedContainer);
         }
 
-        // --- Stream Platform Engine Logic ---
         async function loadHomepage() {
             loadSavedTheme();
             try {
-                const res = await fetch(`${ANIKOTO_BASE}/recent-anime?page=1&per_page=20`);
+                const res = await fetch(`${ANIKOTO_BASE}/recent-anime?page=1&per_page=20`); [span_8](start_span)//[span_8](end_span)
                 const data = await res.json();
                 displayAnimeList(data.results || data);
             } catch (err) {
@@ -190,17 +191,16 @@
         async function searchAnime() {
             const query = document.getElementById('search-input').value.trim();
             if(!query) return alert("Please type an anime title first!");
-            
             document.getElementById('results-grid').innerHTML = "<p>Searching database...</p>";
             
             try {
-                const res = await fetch(`${ANIKOTO_BASE}/recent-anime?page=1&per_page=20`); 
+                const res = await fetch(`${ANIKOTO_BASE}/recent-anime?page=1&per_page=20`); [span_9](start_span)//[span_9](end_span)
                 const data = await res.json();
                 const items = data.results || data;
                 const filtered = items.filter(item => item.title.toLowerCase().includes(query.toLowerCase()));
                 
                 if(filtered.length === 0) {
-                    document.getElementById('results-grid').innerHTML = "<p>No results found in recent updates. Try searching another term.</p>";
+                    document.getElementById('results-grid').innerHTML = "<p>No results found. Try searching another term.</p>";
                 } else {
                     displayAnimeList(filtered);
                 }
@@ -228,38 +228,82 @@
 
         async function loadSeriesDetails(seriesId) {
             try {
-                const res = await fetch(`${ANIKOTO_BASE}/series/${seriesId}`);
+                const res = await fetch(`${ANIKOTO_BASE}/series/${seriesId}`); [span_10](start_span)[span_11](start_span)//[span_10](end_span)[span_11](end_span)
                 const data = await res.json();
+                
+                currentEpisodesList = data.episodes; // Cache list globally for auto-next sequencing
                 
                 document.getElementById('results-grid').style.display = 'none';
                 document.getElementById('player-box').style.display = 'block';
+                document.getElementById('audio-toggles').style.display = 'flex';
                 document.getElementById('ep-title').style.display = 'block';
                 
-                const epBox = document.getElementById('episode-buttons');
-                epBox.innerHTML = '';
+                buildEpisodeButtons();
 
-                data.episodes.forEach((ep, idx) => {
-                    const btn = document.createElement('button');
-                    btn.className = 'ep-btn';
-                    btn.innerText = `${ep.number}`;
-                    
-                    btn.onclick = () => {
-                        document.querySelectorAll('.ep-btn').forEach(b => b.classList.remove('active'));
-                        btn.classList.add('active');
-                        document.getElementById('video-iframe').src = `${PLAYER_BASE}/${ep.episode_embed_id}/sub`;
-                    };
-                    epBox.appendChild(btn);
-                });
-
-                if(data.episodes.length > 0) {
-                    epBox.children[0].click();
+                if(currentEpisodesList.length > 0) {
+                    playEpisode(0);
                 }
-
             } catch (err) {
                 alert("Failed to retrieve series details.");
-                console.error(err);
             }
         }
+
+        function buildEpisodeButtons() {
+            const epBox = document.getElementById('episode-buttons');
+            epBox.innerHTML = '';
+
+            currentEpisodesList.forEach((ep, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'ep-btn';
+                btn.id = `ep-choice-${idx}`;
+                btn.innerText = `${ep.number}`;
+                btn.onclick = () => playEpisode(idx);
+                epBox.appendChild(btn);
+            });
+        }
+
+        function playEpisode(index) {
+            currentEpisodeIndex = index;
+            const episodeData = currentEpisodesList[index];
+            if (!episodeData) return;
+
+            // Update UI Active states
+            document.querySelectorAll('.ep-btn').forEach(b => b.classList.remove('active'));
+            const activeBtn = document.getElementById(`ep-choice-${index}`);
+            if (activeBtn) activeBtn.classList.add('active');
+
+            [span_12](start_span)[span_13](start_span)// Inject language selection dynamically into player endpoint[span_12](end_span)[span_13](end_span)
+            const streamUrl = `${PLAYER_BASE}/${episodeData.episode_embed_id}/${currentLanguage}`; [span_14](start_span)[span_15](start_span)//[span_14](end_span)[span_15](end_span)
+            document.getElementById('video-iframe').src = streamUrl;
+        }
+
+        [span_16](start_span)// Sub and Dub Selector Execution Engine[span_16](end_span)
+        function setLanguage(lang) {
+            currentLanguage = lang;
+            document.getElementById('sub-btn').classList.toggle('active', lang === 'sub');
+            document.getElementById('dub-btn').classList.toggle('active', lang === 'dub');
+            playEpisode(currentEpisodeIndex); // Re-fire player configuration update
+        }
+
+        [span_17](start_span)// --- POSTMESSAGE LISTENER (THE AUTO-NEXT ENGINE) ---[span_17](end_span)
+        window.addEventListener("message", function (event) {
+            let data = event.data;
+            if (typeof data === "string") {
+                try { data = JSON.parse(data); } catch (e) { return; }
+            }
+
+            [span_18](start_span)// Listen for the 'complete' signal originating from MegaPlay[span_18](end_span)
+            [span_19](start_span)if (data && data.event === "complete") { //[span_19](end_span)
+                console.log("Episode ended! Auto-triggering next video stream sequence.");
+                const nextIndex = currentEpisodeIndex + 1;
+                
+                if (nextIndex < currentEpisodesList.length) {
+                    playEpisode(nextIndex); // Seamlessly load the next episode!
+                } else {
+                    alert("You've reached the final episode of this series!");
+                }
+            }
+        });
 
         window.onload = loadHomepage;
     </script>

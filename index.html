@@ -711,11 +711,15 @@
         async function fetchLiveReleasingSchedule(dayMode) {
             const scheduleBox = document.getElementById('schedule-box');
             scheduleBox.innerHTML = '<p style="padding:10px; font-size:13px; color:#888;">Updating timeline...</p>';
+            
             const weekdays = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
             let currentDayIndex = new Date().getDay();
+            
             if (dayMode === 'yesterday') currentDayIndex = (currentDayIndex - 1 + 7) % 7;
             else if (dayMode === 'tomorrow') currentDayIndex = (currentDayIndex + 1) % 7;
+            
             const targetDayString = weekdays[currentDayIndex];
+            
             try {
                 const response = await fetch(`https://api.jikan.moe/v4/schedules?filter=${targetDayString}&limit=40`);
                 const json = await response.json();
@@ -728,13 +732,8 @@
                 
                 scheduleBox.innerHTML = '';
                 
-                // Smart De-duplication Logic
-                const seenMalIds = new Set();
-                
+                // Duplicates are fully retained now as requested
                 rawAnimeList.forEach(anime => {
-                    if (seenMalIds.has(anime.mal_id)) return; // Skip duplicates
-                    seenMalIds.add(anime.mal_id);
-
                     const title = anime.title_english || anime.title;
                     const rawTime = anime.broadcast?.time || "Airing";
                     const converted12hTime = convertJstTo12Hour(rawTime);

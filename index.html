@@ -18,23 +18,30 @@
             color: var(--text-color); 
             font-family: 'Segoe UI', sans-serif; 
             margin: 0; 
-            padding: 20px; 
-            text-align: center; 
+            padding: 0; 
             transition: background 0.3s, color 0.3s;
+            overflow-x: hidden;
         }
 
-        .header-container {
+        /* Top Header Navigation */
+        header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            max-width: 1000px;
-            margin: 0 auto 10px auto;
+            padding: 15px 25px;
+            background: rgba(5, 5, 5, 0.95);
+            position: sticky;
+            top: 0;
+            z-index: 90;
+            border-bottom: 1px solid #1c1c1e;
         }
-        h1 { 
+        .logo {
             color: var(--accent-color); 
             text-shadow: 0 0 10px var(--accent-color); 
-            font-size: 2rem; 
+            font-size: 1.6rem; 
+            font-weight: bold;
             margin: 0;
+            cursor: pointer;
         }
         .settings-icon {
             font-size: 24px;
@@ -44,202 +51,432 @@
             color: var(--accent-color);
             padding: 5px;
         }
-        .tagline { color: var(--muted-text); margin-top: 0; font-size: 0.9rem; }
+
+        /* Portal Main Landing Screen Container Layout */
+        .portal-home {
+            display: block;
+            width: 100%;
+        }
+
+        /* Hero Banner (Inspired by AnimeKai Screenshot) */
+        .hero-banner {
+            position: relative;
+            width: 100%;
+            height: 55vh;
+            min-height: 380px;
+            background: linear-gradient(180deg, rgba(5,5,5,0.2) 0%, rgba(5,5,5,0.95) 100%), 
+                        url('https://images.alphacoders.com/134/1344238.png') center/cover no-repeat;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+            text-align: center;
+        }
         
-        .search-box { display: flex; max-width: 500px; margin: 20px auto; gap: 10px; padding: 0 10px; }
-        input { flex: 1; padding: 12px; border-radius: 8px; border: 2px solid #222; background: var(--container-bg); color: var(--text-color); font-size: 16px; outline: none; }
-        input:focus { border-color: var(--accent-color); box-shadow: 0 0 8px var(--accent-color); }
-        .search-btn { background: var(--accent-color); color: #000; font-weight: bold; border: none; padding: 0 20px; border-radius: 8px; font-size: 16px; cursor: pointer; }
+        /* Centered Big Search Bar Engine */
+        .hero-search-container {
+            width: 100%;
+            max-width: 550px;
+            margin-bottom: 25px;
+        }
+        .search-box { 
+            display: flex; 
+            background: rgba(17, 17, 17, 0.85);
+            border: 2px solid #222;
+            border-radius: 30px; 
+            padding: 6px 6px 6px 18px;
+            gap: 10px; 
+            align-items: center;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+        }
+        .search-box:focus-within {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 15px rgba(0, 255, 102, 0.2);
+        }
+        .search-box input { 
+            flex: 1; 
+            border: none;
+            background: transparent; 
+            color: var(--text-color); 
+            font-size: 16px; 
+            outline: none; 
+        }
+        .search-btn { 
+            background: var(--accent-color); 
+            color: #000; 
+            font-weight: bold; 
+            border: none; 
+            padding: 10px 24px; 
+            border-radius: 25px; 
+            font-size: 15px; 
+            cursor: pointer; 
+            transition: transform 0.2s;
+        }
+        .search-btn:active { transform: scale(0.95); }
 
-        .section-title { color: var(--accent-color); font-size: 1.1rem; margin: 20px auto 10px auto; font-weight: bold; text-align: left; max-width: 1000px; padding: 0 10px; }
+        .hero-tagline {
+            font-size: 1rem;
+            color: #eee;
+            max-width: 500px;
+            margin: 0 auto 20px auto;
+            line-height: 1.5;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+        }
 
-        /* Video Player Wrapper Layout */
+        .watch-now-btn {
+            background: rgb(255, 75, 43);
+            color: white;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border: none;
+            padding: 14px 45px;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 75, 43, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: transform 0.2s, background 0.2s;
+        }
+        .watch-now-btn:hover { background: rgb(235, 55, 23); }
+        .watch-now-btn:active { transform: scale(0.95); }
+
+        /* Main Dashboard Core Split Layout */
+        .content-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 30px;
+            box-sizing: border-box;
+        }
+
+        @media (max-width: 900px) {
+            .content-container { grid-template-columns: 1fr; }
+            .side-panel { margin-top: 20px; }
+        }
+
+        .main-panel { min-width: 0; }
+
+        /* General Section Header Titles */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 25px 0 15px 0;
+            border-left: 4px solid var(--accent-color);
+            padding-left: 12px;
+        }
+        .section-title { 
+            color: #fff; 
+            font-size: 1.3rem; 
+            font-weight: bold; 
+            margin: 0;
+            text-align: left;
+        }
+
+        /* Row Scrolling Feed System (Horizontal Scroller) */
+        .scroll-row {
+            display: flex;
+            gap: 15px;
+            overflow-x: auto;
+            padding: 5px 0 15px 0;
+            scroll-behavior: smooth;
+        }
+        .scroll-row::-webkit-scrollbar { height: 6px; }
+        .scroll-row::-webkit-scrollbar-thumb { background: #2c2c2e; border-radius: 3px; }
+
+        /* Dynamic Grid Layout */
+        .anime-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); 
+            gap: 18px; 
+            margin-bottom: 30px; 
+        }
+
+        /* Improved Card Templates */
+        .anime-card { 
+            background: var(--container-bg); 
+            border-radius: 10px; 
+            overflow: hidden; 
+            cursor: pointer; 
+            transition: transform 0.2s, border-color 0.2s; 
+            border: 1px solid #1c1c1e; 
+            text-align: left;
+            flex: 0 0 150px; /* Forces uniform size inside horizontal scrollbar rows */
+        }
+        .anime-card:hover { transform: translateY(-5px); border-color: var(--accent-color); box-shadow: 0 0 10px rgba(0, 255, 102, 0.2); }
+        .anime-card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; background: #222; }
+        .anime-card .info-box { padding: 10px; }
+        .anime-card .title { font-size: 0.85rem; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-color); margin-bottom: 4px; }
+        .anime-card .meta-tag { font-size: 0.75rem; color: var(--accent-color); font-weight: 500; }
+
+        /* Next Episode Release Schedule Blocks */
+        .schedule-list { background: var(--container-bg); border-radius: 12px; padding: 15px; border: 1px solid #1c1c1e; }
+        .schedule-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #222; }
+        .schedule-item:last-child { border-bottom: none; }
+        .sched-left { text-align: left; max-width: 70%; }
+        .sched-title { font-size: 0.9rem; font-weight: bold; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .sched-ep { font-size: 0.75rem; color: var(--muted-text); margin-top: 2px; }
+        .sched-time { background: rgba(0, 255, 102, 0.1); color: var(--accent-color); font-size: 0.8rem; font-weight: bold; padding: 5px 10px; border-radius: 6px; font-family: monospace; }
+
+        /* Top 10 Sidebar Widget Components */
+        .top10-wrapper { background: var(--container-bg); border-radius: 12px; border: 1px solid #1c1c1e; padding: 10px 15px; }
+        .top10-item { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid #222; cursor: pointer; }
+        .top10-item:last-child { border-bottom: none; }
+        .top10-item:hover .top10-title { color: var(--accent-color); }
+        .top10-rank { font-size: 1.5rem; font-weight: 900; color: var(--muted-text); width: 35px; font-style: italic; text-align: center; font-family: 'Arial Black', sans-serif; }
+        .top10-item:nth-child(-n+3) .top10-rank { color: var(--accent-color); }
+        .top10-thumb { width: 45px; aspect-ratio: 2/3; object-fit: cover; border-radius: 4px; margin-right: 12px; background: #222; }
+        .top10-details { flex: 1; text-align: left; min-width: 0; }
+        .top10-title { font-size: 0.85rem; font-weight: bold; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .top10-stats { font-size: 0.75rem; color: var(--muted-text); margin-top: 3px; }
+
+        /* Streaming Mode Subsystem Viewport Dashboard */
+        .stream-view {
+            display: none;
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 0 15px;
+            box-sizing: border-box;
+        }
         .player-container { 
-            max-width: 800px; 
-            margin: 20px auto; 
+            width: 100%; 
             aspect-ratio: 16/9; 
             background: #000; 
             border-radius: 12px; 
             overflow: hidden; 
             border: 2px solid var(--accent-color); 
-            box-shadow: 0 0 15px var(--accent-color); 
-            display: none; 
+            box-shadow: 0 0 20px rgba(0, 255, 102, 0.2); 
+            margin-bottom: 20px;
         }
         iframe { width: 100%; height: 100%; border: none; }
 
         /* Sub / Dub Toggles */
-        .audio-toggle-container { margin: 15px auto; display: none; justify-content: center; gap: 10px; max-width: 800px; }
-        .audio-btn { background: #222; color: #fff; border: 1px solid #444; padding: 6px 16px; border-radius: 20px; font-size: 14px; cursor: pointer; font-weight: bold; }
+        .audio-toggle-container { margin: 15px auto; display: flex; justify-content: center; gap: 10px; }
+        .audio-btn { background: #1c1c1e; color: #fff; border: 1px solid #2c2c2e; padding: 8px 20px; border-radius: 20px; font-size: 14px; cursor: pointer; font-weight: bold; }
         .audio-btn.active { background: var(--accent-color); color: #000; border-color: var(--accent-color); }
 
-        /* Anime Grid Cards */
-        .anime-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; max-width: 1000px; margin: 10px auto 30px auto; padding: 10px; }
-        .anime-card { background: var(--container-bg); border-radius: 8px; overflow: hidden; cursor: pointer; transition: transform 0.2s, border-color 0.2s; border: 1px solid #222; text-align: left; }
-        .anime-card:hover { transform: translateY(-5px); border-color: var(--accent-color); box-shadow: 0 0 10px var(--accent-color); }
-        .anime-card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; background: #222; }
-        .anime-card .title { padding: 10px; font-size: 0.85rem; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-color); }
-
-        /* Episode Panel */
-        .episodes-title { margin-top: 20px; display: none; color: var(--accent-color); font-size: 1.2rem; }
-        .episode-list { max-width: 800px; margin: 15px auto; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
-        .ep-btn { background: var(--container-bg); color: var(--text-color); border: 1px solid #333; padding: 8px 16px; font-size: 14px; border-radius: 6px; cursor: pointer; min-width: 60px; }
+        /* Episode Panel Selection */
+        .ep-title { color: var(--accent-color); font-size: 1.3rem; margin-top: 25px; font-weight: bold; text-align: left; }
+        .episode-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 15px 0 40px 0; }
+        .ep-btn { background: var(--container-bg); color: var(--text-color); border: 1px solid #222; padding: 10px 18px; font-size: 14px; border-radius: 6px; cursor: pointer; min-width: 65px; text-align: center; }
         .ep-btn:hover, .ep-btn.active { background: var(--accent-color); color: #000; border-color: var(--accent-color); font-weight: bold; box-shadow: 0 0 8px var(--accent-color); }
 
-        /* RGB Settings Modal Styling */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 100; justify-content: center; align-items: center; }
-        .modal-content { background: #121214; border: 2px solid var(--accent-color); padding: 25px; border-radius: 16px; max-width: 320px; width: 85%; text-align: left; position: relative; }
-        .close-btn { position: absolute; top: 12px; right: 18px; font-size: 22px; cursor: pointer; color: var(--muted-text); }
-        
-        .theme-section-title { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted-text); margin: 15px 0 8px 0; font-weight: bold; }
-        
-        /* Custom RGB Slider Components */
-        .rgb-container { background: #1c1c21; padding: 12px; border-radius: 10px; border: 1px solid #2d2d35; margin-bottom: 15px; }
-        .slider-row { display: flex; align-items: center; margin-bottom: 10px; gap: 10px; }
-        .slider-row:last-child { margin-bottom: 0; }
-        .slider-row label { width: 20px; font-weight: bold; font-size: 14px; }
-        .slider-row input[type="range"] { flex: 1; }
-        .slider-row span { width: 35px; text-align: right; font-size: 13px; font-family: monospace; color: #aaa; }
-        
-        .color-preview-box { height: 35px; border-radius: 6px; border: 1px solid #444; margin-top: 10px; }
+        /* SLIDE-UP NATIVE BOTTOM MENU OVERLAYS */
+        .bottom-sheet-overlay { 
+            display: none; 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(0,0,0,0.6); 
+            z-index: 1000; 
+        }
+        .bottom-sheet { 
+            position: fixed; 
+            bottom: -100%; 
+            left: 0; 
+            width: 100%; 
+            background: #1c1c1e; 
+            border-radius: 24px 24px 0 0; 
+            box-sizing: border-box;
+            padding: 24px; 
+            z-index: 1001; 
+            text-align: left;
+            transition: bottom 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+        .bottom-sheet.open { bottom: 0; }
+        .sheet-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 18px; color: #fff; text-align: center; }
+        .theme-section-title { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted-text); margin: 20px 0 10px 0; font-weight: bold; }
 
-        /* Background Selector Cards */
-        .custom-options-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
-        .option-tile { background: #1c1c21; border: 2px solid #2d2d35; padding: 10px; border-radius: 8px; text-align: center; cursor: pointer; font-size: 0.85rem; color: #eee; }
-        .option-tile.selected { border-color: var(--accent-color); background: rgba(255, 255, 255, 0.02); }
-        
-        .save-theme-btn { background: var(--accent-color); color: #000; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 15px; font-size: 15px; }
+        /* RGB Visual Component Adjusters */
+        .rgb-container { background: #2c2c2e; padding: 14px; border-radius: 14px; margin-bottom: 15px; }
+        .slider-row { display: flex; align-items: center; margin-bottom: 12px; gap: 12px; }
+        .slider-row label { width: 20px; font-weight: bold; font-size: 15px; }
+        .slider-row input[type="range"] { flex: 1; accent-color: var(--accent-color); }
+        .slider-row span { width: 35px; text-align: right; font-size: 14px; font-family: monospace; color: #aaa; }
+        .color-preview-box { height: 40px; border-radius: 8px; border: 1px solid #444; margin-top: 12px; }
 
-        /* LANDSCAPE SMART MODE FIX: Removes unwanted blocks when phone is rotated sideways to watch video */
+        /* Radio Row Options */
+        .menu-row { display: flex; align-items: center; padding: 14px 4px; border-bottom: 1px solid #2c2c2e; cursor: pointer; }
+        .menu-row input[type="radio"] { 
+            appearance: none; -webkit-appearance: none; width: 22px; height: 22px; border: 2px solid #555; border-radius: 50%; margin-right: 14px; outline: none; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;
+        }
+        .menu-row input[type="radio"]:checked { border-color: var(--accent-color); }
+        .menu-row input[type="radio"]:checked::before { content: ""; width: 12px; height: 12px; background: var(--accent-color); border-radius: 50%; display: block; }
+        .menu-row label { font-size: 1rem; color: #eee; flex: 1; cursor: pointer; }
+        .done-btn { background: none; border: none; color: #fff; width: 100%; text-align: center; padding: 16px 0 6px 0; font-size: 1.05rem; font-weight: 600; cursor: pointer; margin-top: 10px; }
+
+        /* LANDSCAPE SMART MODE VIDEO INTERFERENCE PATCH */
         @media (orientation: landscape) and (max-height: 500px) {
             body { padding: 0; background: #000; }
-            .header-container, .tagline, .search-box, .section-title, #results-grid, .episodes-title, #episode-buttons, #audio-toggles { 
+            header, .portal-home, .bottom-sheet-overlay, .bottom-sheet, .audio-toggle-container, .ep-title, .episode-list { 
                 display: none !important; 
             }
+            .stream-view { display: block !important; padding: 0; margin: 0; max-width: 100vw; }
             .player-container { 
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100vw;
-                height: 100vh;
-                max-width: 100vw;
-                margin: 0;
-                border: none;
-                border-radius: 0;
-                box-shadow: none;
-                z-index: 9999;
-                display: block !important;
+                position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; max-width: 100vw; margin: 0; border: none; border-radius: 0; box-shadow: none; z-index: 9999; display: block !important;
             }
         }
     </style>
 </head>
 <body>
 
-    <div class="header-container">
-        <h1 id="brand-logo" onclick="location.reload()" style="cursor:pointer;">dude9anime</h1>
-        <button class="settings-icon" onclick="toggleModal(true)">⚙️</button>
-    </div>
-    <p class="tagline">Your Next Anime Adventure Awaits</p>
+    <header>
+        <div class="logo" onclick="homeReturnReset()">dude9anime</div>
+        <button class="settings-icon" onclick="openBottomSheet()">⚙️</button>
+    </header>
 
-    <div class="search-box">
-        <input type="text" id="search-input" placeholder="Search anime by title (e.g. Naruto, One Piece)...">
-        <button class="search-btn" onclick="searchAnime()">Search</button>
-    </div>
-
-    <div class="section-title" id="grid-header">Trending Anime Broadcasts</div>
-    <div id="results-grid" class="anime-grid"></div>
-
-    <div id="player-box" class="player-container">
-        <iframe id="video-iframe" src="" allowfullscreen scrolling="no"></iframe>
-    </div>
-
-    <div id="audio-toggles" class="audio-toggle-container">
-        <button id="sub-btn" class="audio-btn active" onclick="setLanguage('sub')">SUB</button>
-        <button id="dub-btn" class="audio-btn" onclick="setLanguage('dub')">DUB</button>
-    </div>
-
-    <h3 id="ep-title" class="episodes-title">Available Episodes</h3>
-    <div id="episode-buttons" class="episode-list"></div>
-
-    <div id="settings-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-btn" onclick="toggleModal(false)">&times;</span>
-            <h3 style="margin-top: 0; color: var(--accent-color); font-size: 1.3rem;">Customization Engine</h3>
-            
-            <div class="theme-section-title">RGB Accent Mixer</div>
-            <div class="rgb-container">
-                <div class="slider-row">
-                    <label style="color: #ff4444;">R</label>
-                    <input type="range" id="range-r" min="0" max="255" value="0" oninput="updateRgbMixer()">
-                    <span id="val-r">0</span>
+    <div id="home-portal" class="portal-home">
+        
+        <div class="hero-banner">
+            <div class="hero-search-container">
+                <div class="search-box">
+                    <input type="text" id="search-input" placeholder="Search anime titles directly...">
+                    <button class="search-btn" onclick="triggerCatalogSearch()">Search</button>
                 </div>
-                <div class="slider-row">
-                    <label style="color: #00ff66;">G</label>
-                    <input type="range" id="range-g" min="0" max="255" value="255" oninput="updateRgbMixer()">
-                    <span id="val-g">255</span>
-                </div>
-                <div class="slider-row">
-                    <label style="color: #00ccff;">B</label>
-                    <input type="range" id="range-b" min="0" max="255" value="102" oninput="updateRgbMixer()">
-                    <span id="val-b">102</span>
-                </div>
-                <div class="color-preview-box" id="rgb-preview"></div>
             </div>
-
-            <div class="theme-section-title">Background Theme</div>
-            <div class="custom-options-grid" id="bg-tiles-container">
-                <div class="option-tile selected" data-value="pitch-black" id="tile-pitch-black" onclick="selectBgTile('pitch-black')">Pitch Black</div>
-                <div class="option-tile" data-value="dark-gray" id="tile-dark-gray" onclick="selectBgTile('dark-gray')">Dark Charcoal</div>
-            </div>
-
-            <button class="save-theme-btn" onclick="saveTheme()">Apply Configurations</button>
+            <p class="hero-tagline">One Piece, Solo Leveling, Demon Slayer, Re:Zero Starting Life in Another World, Chainsaw Man</p>
+            <button class="watch-now-btn" onclick="scrollToCatalog()">Watch Now</button>
         </div>
+
+        <div class="content-container">
+            
+            <div class="main-panel" id="catalog-anchor">
+                
+                <div class="section-header">
+                    <h2 class="section-title">Editor Recommendations</h2>
+                </div>
+                <div id="recommendations-scroller" class="scroll-row">
+                    </div>
+
+                <div class="section-header">
+                    <h2 class="section-title" id="grid-header-title">Recently Added Broadcasting Catalogs</h2>
+                </div>
+                <div id="results-grid" class="anime-grid">
+                    </div>
+            </div>
+
+            <div class="side-panel">
+                
+                <div class="section-header" style="margin-top: 0;">
+                    <h2 class="section-title">Upcoming Releases Today</h2>
+                </div>
+                <div class="schedule-list" id="schedule-box">
+                    </div>
+
+                <div class="section-header">
+                    <h2 class="section-title">Top 10 Watched Globally</h2>
+                </div>
+                <div class="top10-wrapper" id="top10-box">
+                    </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div id="stream-dashboard-box" class="stream-view">
+        <div id="player-box" class="player-container">
+            <iframe id="video-iframe" src="" allowfullscreen scrolling="no"></iframe>
+        </div>
+
+        <div id="audio-toggles" class="audio-toggle-container">
+            <button id="sub-btn" class="audio-btn active" onclick="setLanguage('sub')">SUB</button>
+            <button id="dub-btn" class="audio-btn" onclick="setLanguage('dub')">DUB</button>
+        </div>
+
+        <h3 id="ep-title" class="ep-title">Available Episodes</h3>
+        <div id="episode-buttons" class="episode-list"></div>
+    </div>
+
+    <div id="sheet-overlay" class="bottom-sheet-overlay" onclick="closeBottomSheet()"></div>
+    <div id="bottom-sheet-menu" class="bottom-sheet">
+        <div class="sheet-title">Theme Settings</div>
+        
+        <div class="theme-section-title">RGB Accent Mixer</div>
+        <div class="rgb-container">
+            <div class="slider-row">
+                <label style="color: #ff4444;">R</label>
+                <input type="range" id="range-r" min="0" max="255" value="0" oninput="updateRgbMixer()">
+                <span id="val-r">0</span>
+            </div>
+            <div class="slider-row">
+                <label style="color: #00ff66;">G</label>
+                <input type="range" id="range-g" min="0" max="255" value="255" oninput="updateRgbMixer()">
+                <span id="val-g">255</span>
+            </div>
+            <div class="slider-row">
+                <label style="color: #00ccff;">B</label>
+                <input type="range" id="range-b" min="0" max="255" value="102" oninput="updateRgbMixer()">
+                <span id="val-b">102</span>
+            </div>
+            <div class="color-preview-box" id="rgb-preview"></div>
+        </div>
+
+        <div class="theme-section-title">Background Base</div>
+        <div class="menu-row" onclick="selectRadioTile('pitch-black')">
+            <input type="radio" id="radio-pitch-black" name="bg-selection" value="pitch-black" checked>
+            <label for="radio-pitch-black">Pitch Black</label>
+        </div>
+        <div class="menu-row" onclick="selectRadioTile('dark-gray')">
+            <input type="radio" id="radio-dark-gray" name="bg-selection" value="dark-gray">
+            <label for="radio-dark-gray">Dark Charcoal</label>
+        </div>
+
+        <button class="done-btn" onclick="saveThemeAndClose()">Done</button>
     </div>
 
     <script>
         const MAL_PLAYER_BASE = "https://megaplay.buzz/stream/mal";
 
-        // App States
+        // Global Orchestrations State Management 
         let currentEpisodeIndex = 1;
         let currentLanguage = 'sub';
         let currentMalId = "";
         let selectedBgValue = "pitch-black";
-        
-        // RGB Default Active Mixers (Green)
         let rVal = 0, gVal = 255, bVal = 102;
 
-        function toggleModal(show) {
-            document.getElementById('settings-modal').style.display = show ? 'flex' : 'none';
-            if(show) {
-                updateRgbMixer();
-            }
+        function openBottomSheet() {
+            document.getElementById('sheet-overlay').style.display = 'block';
+            setTimeout(() => { document.getElementById('bottom-sheet-menu').classList.add('open'); }, 10);
+            updateRgbMixer();
+        }
+
+        function closeBottomSheet() {
+            document.getElementById('bottom-sheet-menu').classList.remove('open');
+            setTimeout(() => { document.getElementById('sheet-overlay').style.display = 'none'; }, 300);
         }
 
         function updateRgbMixer() {
             rVal = document.getElementById('range-r').value;
             gVal = document.getElementById('range-g').value;
             bVal = document.getElementById('range-b').value;
-
             document.getElementById('val-r').innerText = rVal;
             document.getElementById('val-g').innerText = gVal;
             document.getElementById('val-b').innerText = bVal;
-
-            const hexColor = `rgb(${rVal}, ${gVal}, ${bVal})`;
-            document.getElementById('rgb-preview').style.backgroundColor = hexColor;
+            document.getElementById('rgb-preview').style.backgroundColor = `rgb(${rVal}, ${gVal}, ${bVal})`;
         }
 
-        function selectBgTile(value) {
-            document.querySelectorAll('#bg-tiles-container .option-tile').forEach(t => t.classList.remove('selected'));
-            const activeTile = document.getElementById(`tile-${value}`);
-            if(activeTile) activeTile.classList.add('selected');
+        function selectRadioTile(value) {
+            document.getElementById(`radio-${value}`).checked = true;
             selectedBgValue = value;
         }
 
-        function saveTheme() {
+        function saveThemeAndClose() {
+            if (document.getElementById('radio-dark-gray').checked) selectedBgValue = "dark-gray";
+            else selectedBgValue = "pitch-black";
+
             let bg = "#050505", container = "#111111";
             if (selectedBgValue === "dark-gray") { bg = "#1a1a1e"; container = "#252529"; }
 
             const targetColor = `rgb(${rVal}, ${gVal}, ${bVal})`;
-            
             document.documentElement.style.setProperty('--accent-color', targetColor);
             document.documentElement.style.setProperty('--bg-color', bg);
             document.documentElement.style.setProperty('--container-bg', container);
@@ -248,15 +485,14 @@
             localStorage.setItem('dude9anime-g', gVal);
             localStorage.setItem('dude9anime-b', bVal);
             localStorage.setItem('dude9anime-bg', selectedBgValue);
-            
-            toggleModal(false);
+            closeBottomSheet();
         }
 
         function loadSavedTheme() {
             const savedR = localStorage.getItem('dude9anime-r');
             const savedG = localStorage.getItem('dude9anime-g');
             const savedB = localStorage.getItem('dude9anime-b');
-            const savedBgMode = localStorage.getItem('localStorage-bg') || localStorage.getItem('dude9anime-bg');
+            const savedBgMode = localStorage.getItem('dude9anime-bg');
 
             if (savedR !== null && savedG !== null && savedB !== null) {
                 rVal = savedR; gVal = savedG; bVal = savedB;
@@ -271,81 +507,158 @@
                 if (savedBgMode === "dark-gray") { bg = "#1a1a1e"; container = "#252529"; }
                 document.documentElement.style.setProperty('--bg-color', bg);
                 document.documentElement.style.setProperty('--container-bg', container);
-                
-                document.querySelectorAll('#bg-tiles-container .option-tile').forEach(t => t.classList.remove('selected'));
-                const activeTile = document.getElementById(`tile-${savedBgMode}`);
-                if(activeTile) activeTile.classList.add('selected');
+                const targetRadio = document.getElementById(`radio-${savedBgMode}`);
+                if(targetRadio) targetRadio.checked = true;
             }
         }
 
-        async function loadHomepage() {
+        function scrollToCatalog() {
+            document.getElementById('catalog-anchor').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function homeReturnReset() {
+            document.getElementById('stream-dashboard-box').style.display = 'none';
+            document.getElementById('home-portal').style.display = 'block';
+            document.getElementById('search-input').value = "";
+            document.getElementById('grid-header-title').innerText = "Recently Added Broadcasting Catalogs";
+            loadMainFeeds();
+        }
+
+        // System Core Orchestrations Lifecycle Feeds
+        async function loadMainFeeds() {
             loadSavedTheme();
-            document.getElementById('results-grid').innerHTML = "<p>Loading anime dashboard directory...</p>";
+            renderReleaseSchedule();
+            
+            // Build Recommendations & Recently Added via Live Jikan Engine Mappings
             try {
-                const res = await fetch("https://api.jikan.moe/v4/top/anime?limit=12");
+                const res = await fetch("https://api.jikan.moe/v4/top/anime?limit=22");
                 const json = await res.json();
-                displayAnimeGrid(json.data);
+                const dataset = json.data || [];
+                
+                if(dataset.length > 0) {
+                    // Feed first 10 entries directly into Recommendations horizontal row
+                    displayScrollFeed(dataset.slice(0, 10), 'recommendations-scroller', 'Rec');
+                    // Feed remaining records directly into Main Feed Grids
+                    displayGridFeed(dataset.slice(10, 22), 'results-grid');
+                    // Render Sidebar Top 10 Block
+                    displayTop10Sidebar(dataset.slice(0, 10));
+                }
             } catch (err) {
-                document.getElementById('results-grid').innerHTML = "<p>Network timeout loading dashboard. Try searching a title directly.</p>";
+                document.getElementById('results-grid').innerHTML = "<p>Network database offline. Use portal search parameters.</p>";
             }
         }
 
-        async function searchAnime() {
+        async function triggerCatalogSearch() {
             const query = document.getElementById('search-input').value.trim();
-            if(!query) return alert("Type an anime title first!");
+            if(!query) return alert("Enter structural text queries first!");
             
-            document.getElementById('results-grid').innerHTML = "<p>Searching database directory...</p>";
-            document.getElementById('grid-header').innerText = `Search Results for: "${query}"`;
-            
+            document.getElementById('grid-header-title').innerText = `Search Results matching: "${query}"`;
+            document.getElementById('results-grid').innerHTML = "<p>Searching catalogs...</p>";
+            scrollToCatalog();
+
             try {
                 const res = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(query)}&limit=16`);
                 const json = await res.json();
-                
                 if(!json.data || json.data.length === 0) {
-                    document.getElementById('results-grid').innerHTML = "<p>No matches found. Try checking your spelling.</p>";
+                    document.getElementById('results-grid').innerHTML = "<p>No titles matched. Please check your spelling.</p>";
                 } else {
-                    displayAnimeGrid(json.data);
+                    displayGridFeed(json.data, 'results-grid');
                 }
-            } catch (err) {
-                document.getElementById('results-grid').innerHTML = "<p>Search system busy. Please try again in a few seconds.</p>";
+            } catch (e) {
+                document.getElementById('results-grid').innerHTML = "<p>Search timeout. Try again shortly.</p>";
             }
         }
 
-        function displayAnimeGrid(animeDataArray) {
-            const grid = document.getElementById('results-grid');
-            grid.innerHTML = '';
-            grid.style.display = 'grid';
-            
-            animeDataArray.forEach(anime => {
+        function displayScrollFeed(animeArray, elementId, statusTag) {
+            const container = document.getElementById(elementId);
+            container.innerHTML = '';
+            animeArray.forEach(anime => {
+                const title = anime.title_english || anime.title;
                 const card = document.createElement('div');
                 card.className = 'anime-card';
-                const title = anime.title_english || anime.title;
-                const image = anime.images?.jpg?.large_image_url || anime.images?.jpg?.image_url;
-                
                 card.innerHTML = `
-                    <img src="${image || 'https://via.placeholder.com/150x225?text=No+Poster'}" alt="Poster">
-                    <div class="title">${title}</div>
+                    <img src="${anime.images?.jpg?.image_url || ''}" alt="poster">
+                    <div class="info-box">
+                        <div class="title">${title}</div>
+                        <div class="meta-tag">${statusTag}</div>
+                    </div>
                 `;
-                card.onclick = () => loadStreamingLayout(anime.mal_id, title, anime.episodes || 24);
-                grid.appendChild(card);
+                card.onclick = () => loadStreamingLayout(anime.mal_id, title, anime.episodes || 12);
+                container.appendChild(card);
+            });
+        }
+
+        function displayGridFeed(animeArray, elementId) {
+            const container = document.getElementById(elementId);
+            container.innerHTML = '';
+            animeArray.forEach(anime => {
+                const title = anime.title_english || anime.title;
+                const card = document.createElement('div');
+                card.className = 'anime-card';
+                card.innerHTML = `
+                    <img src="${anime.images?.jpg?.image_url || ''}" alt="poster">
+                    <div class="info-box">
+                        <div class="title">${title}</div>
+                        <div class="meta-tag">Ep ${anime.episodes || '?' } / Dub+Sub</div>
+                    </div>
+                `;
+                card.onclick = () => loadStreamingLayout(anime.mal_id, title, anime.episodes || 12);
+                container.appendChild(card);
+            });
+        }
+
+        function displayTop10Sidebar(animeArray) {
+            const container = document.getElementById('top10-box');
+            container.innerHTML = '';
+            animeArray.forEach((anime, idx) => {
+                const title = anime.title_english || anime.title;
+                const row = document.createElement('div');
+                row.className = 'top10-item';
+                row.innerHTML = `
+                    <div class="top10-rank">${idx + 1}</div>
+                    <img class="top10-thumb" src="${anime.images?.jpg?.small_image_url || anime.images?.jpg?.image_url}" alt="thumb">
+                    <div class="top10-details">
+                        <div class="top10-title">${title}</div>
+                        <div class="top10-stats">★ ${anime.score || '8.5'} | Score Rank #${anime.rank || (idx+1)}</div>
+                    </div>
+                `;
+                row.onclick = () => loadStreamingLayout(anime.mal_id, title, anime.episodes || 12);
+                container.appendChild(row);
+            });
+        }
+
+        function renderReleaseSchedule() {
+            const scheduleBox = document.getElementById('schedule-box');
+            const localTitles = [
+                { title: "One Piece", ep: "Episode 1142", time: "In 2h 15m" },
+                { title: "Re:Zero Season 3", ep: "Episode 9", time: "In 5h 40m" },
+                { title: "Wistoria: Wand and Sword", ep: "Episode 4", time: "In 8h 10m" },
+                { title: "Solo Leveling Arise", ep: "Episode 2", time: "In 14h 05m" }
+            ];
+            scheduleBox.innerHTML = '';
+            localTitles.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'schedule-item';
+                div.innerHTML = `
+                    <div class="sched-left">
+                        <div class="sched-title">${item.title}</div>
+                        <div class="sched-ep">${item.ep}</div>
+                    </div>
+                    <div class="sched-time">${item.time}</div>
+                `;
+                scheduleBox.appendChild(div);
             });
         }
 
         function loadStreamingLayout(malId, titleName, totalEpisodes) {
             currentMalId = malId;
-            
-            document.getElementById('results-grid').style.display = 'none';
-            document.getElementById('grid-header').style.display = 'none';
-            
-            document.getElementById('player-box').style.display = 'block';
-            document.getElementById('audio-toggles').style.display = 'flex';
-            document.getElementById('ep-title').style.display = 'block';
+            document.getElementById('home-portal').style.display = 'none';
+            document.getElementById('stream-dashboard-box').style.display = 'block';
             document.getElementById('ep-title').innerText = `Watching: ${titleName}`;
             
             const epBox = document.getElementById('episode-buttons');
             epBox.innerHTML = '';
-
-            const totalCount = totalEpisodes || 50;
+            const totalCount = totalEpisodes || 24;
 
             for (let i = 1; i <= totalCount; i++) {
                 const btn = document.createElement('button');
@@ -355,7 +668,6 @@
                 btn.onclick = () => launchVideoPlayer(i);
                 epBox.appendChild(btn);
             }
-            
             launchVideoPlayer(1);
         }
 
@@ -364,9 +676,7 @@
             document.querySelectorAll('.ep-btn').forEach(b => b.classList.remove('active'));
             const activeBtn = document.getElementById(`ep-choice-${epNum}`);
             if (activeBtn) activeBtn.classList.add('active');
-
-            const streamUrl = `${MAL_PLAYER_BASE}/${currentMalId}/${epNum}/${currentLanguage}`;
-            document.getElementById('video-iframe').src = streamUrl;
+            document.getElementById('video-iframe').src = `${MAL_PLAYER_BASE}/${currentMalId}/${epNum}/${currentLanguage}`;
         }
 
         function setLanguage(lang) {
@@ -378,16 +688,11 @@
 
         window.addEventListener("message", function (event) {
             let data = event.data;
-            if (typeof data === "string") {
-                try { data = JSON.parse(data); } catch (e) { return; }
-            }
-
-            if (data && data.event === "complete") {
-                launchVideoPlayer(currentEpisodeIndex + 1);
-            }
+            if (typeof data === "string") { try { data = JSON.parse(data); } catch (e) { return; } }
+            if (data && data.event === "complete") { launchVideoPlayer(currentEpisodeIndex + 1); }
         });
 
-        window.onload = loadHomepage;
+        window.onload = loadMainFeeds;
     </script>
 </body>
 </html>

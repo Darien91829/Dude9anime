@@ -593,7 +593,7 @@
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Integrated using your exact Firebase Project configurations
+        // Firebase Client-Side Configurations Object
         const firebaseConfig = {
             apiKey: "AIzaSyCjMNzlM-TqGf5Q34rgmtzH90G4jb40Jaw",
             authDomain: "dude9anime.firebaseapp.com",
@@ -979,8 +979,19 @@
                     scheduleBox.innerHTML = `<p style="padding:10px; font-size:13px; color:#888;">No ongoing broadcasts scheduled.</p>`; 
                     return; 
                 }
+                
                 scheduleBox.innerHTML = '';
+                
+                // Consolidate API listings and filter out duplicates using a clean JS Map
+                const mapCleanCache = new Map();
                 ongoingAnime.forEach(anime => {
+                    const title = anime.title_english || anime.title;
+                    if(!mapCleanCache.has(title)) {
+                        mapCleanCache.set(title, anime);
+                    }
+                });
+
+                mapCleanCache.forEach(anime => {
                     const title = anime.title_english || anime.title;
                     const broadcastTime = anime.broadcast?.time || "Airing";
                     const imgUrl = anime.images?.jpg?.image_url || "";
@@ -1073,10 +1084,16 @@
             document.querySelectorAll('.ep-btn').forEach(b => b.classList.remove('active'));
             const activeBtn = document.getElementById(`ep-choice-${epNum}`);
             if (activeBtn) activeBtn.classList.add('active');
+            
+            const playerBox = document.getElementById('player-box');
+            if (!playerBox) return;
+            
+            // Render basic frame template
+            playerBox.innerHTML = '<iframe id="video-iframe" src="" allowfullscreen scrolling="no"></iframe>';
             const iframe = document.getElementById('video-iframe');
-            if (!iframe) return;
             iframe.src = `${MAL_PLAYER_BASE}/${window.currentMalId}/${epNum}/${currentLanguage}`;
             
+            // Set error watchdog callback to catch empty or un-routable API streams safely
             clearTimeout(window.streamLoadGuard);
             window.streamLoadGuard = setTimeout(() => handleStreamMissingNotice(), 8000);
         }
@@ -1084,8 +1101,9 @@
         function handleStreamMissingNotice() {
             document.getElementById('player-box').innerHTML = `
                 <div style="width:100%; height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center; background:#111; color:#aaa; padding:20px; text-align:center;">
-                    <p style="font-size:1.4rem; color:#ff4b2b; font-weight:bold;">⚠️ Video Source Not Available</p>
-                    <button onclick="openExplorationHub()" style="background:var(--accent-color); color:#000; border:none; padding:10px 20px; border-radius:20px; font-weight:bold; cursor:pointer;">Back to Dashboard</button>
+                    <p style="font-size:1.4rem; color:var(--accent-color); text-shadow: 0 0 10px var(--accent-color); font-weight:bold; margin-bottom:5px;">⚠️ Video Source Not Available</p>
+                    <p style="font-size:0.9rem; color:#666; margin-bottom:20px;">The third-party streaming API could not parse a valid media source folder for this episode catalog.</p>
+                    <button onclick="openExplorationHub()" style="background:var(--accent-color); color:#000; border:none; padding:10px 24px; border-radius:20px; font-weight:bold; cursor:pointer; font-size:14px; box-shadow:0 0 12px var(--accent-color);">Back to Dashboard</button>
                 </div>`;
         }
 

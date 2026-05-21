@@ -406,26 +406,21 @@
 
     <div id="main-exploration-hub" class="portal-dashboard">
         <div class="content-container" id="grid-split-container">
-            
             <div class="main-panel">
-                
                 <div id="recommendations-container-block">
                     <div class="section-header">
                         <h2 class="section-title">Editor Recommendations</h2>
                     </div>
-                    <div id="recommendations-scroller" class="scroll-row">
-                        </div>
+                    <div id="recommendations-scroller" class="scroll-row"></div>
                 </div>
 
                 <div class="section-header">
                     <h2 class="section-title" id="grid-header-title">Recently Added Broadcasting Catalogs</h2>
                 </div>
-                <div id="results-grid" class="anime-grid">
-                    </div>
+                <div id="results-grid" class="anime-grid"></div>
             </div>
 
             <div class="side-panel" id="sidebar-container-block">
-                
                 <div class="section-header" style="margin-top: 0; margin-bottom: 10px;">
                     <h2 class="section-title">Broadcast Schedule</h2>
                 </div>
@@ -443,9 +438,7 @@
                 <div class="section-header">
                     <h2 class="section-title">Top 10 Watched Globally</h2>
                 </div>
-                <div class="top10-wrapper" id="top10-box">
-                    </div>
-
+                <div class="top10-wrapper" id="top10-box"></div>
             </div>
         </div>
     </div>
@@ -467,7 +460,6 @@
     <div id="sheet-overlay" class="bottom-sheet-overlay" onclick="closeBottomSheet()"></div>
     <div id="bottom-sheet-menu" class="bottom-sheet">
         <div class="sheet-title">Theme Settings</div>
-        
         <div class="theme-section-title">RGB Accent Mixer</div>
         <div class="rgb-container">
             <div class="slider-row">
@@ -487,7 +479,6 @@
             </div>
             <div class="color-preview-box" id="rgb-preview"></div>
         </div>
-
         <div class="theme-section-title">Background Base</div>
         <div class="menu-row" onclick="selectRadioTile('pitch-black')">
             <input type="radio" id="radio-pitch-black" name="bg-selection" value="pitch-black" checked>
@@ -497,7 +488,6 @@
             <input type="radio" id="radio-dark-gray" name="bg-selection" value="dark-gray">
             <label for="radio-dark-gray">Dark Charcoal</label>
         </div>
-
         <button class="done-btn" onclick="saveThemeAndClose()">Done</button>
     </div>
 
@@ -505,15 +495,12 @@
         const MAL_PLAYER_BASE = "https://megaplay.buzz/stream/mal";
         const ANIKOTO_PLAYER_BASE = "https://megaplay.buzz/stream/s-2"; 
 
-        // Global Architectural Application Variables
         let currentEpisodeIndex = 1;
         let currentLanguage = 'sub';
         let currentMalId = "";
         let selectedBgValue = "pitch-black";
         let rVal = 0, gVal = 255, bVal = 102;
         let activeScheduleDay = 'today';
-
-        // Fallback Tracking Arrays
         let useAnikotoFallback = false;
         let anikotoEpisodeEmbedIds = []; 
 
@@ -586,18 +573,14 @@
             }
         }
 
-        // NAVIGATOR SWITCH: TRANSITION INTO EXPLORATION MODE HUB
         function openExplorationHub() {
             document.getElementById('landing-portal').style.display = 'none';
             document.getElementById('stream-dashboard-box').style.display = 'none';
             document.getElementById('main-exploration-hub').style.display = 'block';
-            
             document.getElementById('header-search-engine').style.display = 'flex';
-            
             document.getElementById('recommendations-container-block').style.display = 'block';
             document.getElementById('sidebar-container-block').style.display = 'block';
             document.getElementById('grid-split-container').style.gridTemplateColumns = "1fr 320px";
-            
             document.getElementById('grid-header-title').innerText = "Recently Added Broadcasting Catalogs";
             loadMainHubFeeds();
         }
@@ -606,66 +589,48 @@
             document.getElementById('stream-dashboard-box').style.display = 'none';
             document.getElementById('main-exploration-hub').style.display = 'none';
             document.getElementById('header-search-engine').style.display = 'none';
-            
             document.getElementById('landing-portal').style.display = 'flex';
             document.getElementById('search-input').value = "";
             document.getElementById('header-search-input').value = "";
         }
 
-        // CORE SYSTEM ASYNCHRONOUS DATA CAPTURING LIFECYCLES
         async function loadMainHubFeeds() {
             fetchLiveReleasingSchedule(activeScheduleDay);
-            
             try {
                 const res = await fetch("https://api.jikan.moe/v4/top/anime?limit=22");
                 const json = await res.json();
                 const dataset = json.data || [];
-                
                 if(dataset.length > 0) {
-                    displayScrollFeed(dataset.slice(0, 10), 'recommendations-scroller', 'Rec');
+                    displayScrollFeed(dataset.slice(0, 10), 'recommendations-scroller');
                     displayGridFeed(dataset.slice(10, 22), 'results-grid');
                     displayTop10Sidebar(dataset.slice(0, 10));
                 }
-            } catch (err) {
-                document.getElementById('results-grid').innerHTML = "<p>Network database offline.</p>";
-            }
+            } catch (err) { document.getElementById('results-grid').innerHTML = "<p>Network database offline.</p>"; }
         }
 
-        // DYNAMIC CATALOG ARCHIVE SEARCH QUERY HANDLERS
         async function triggerCatalogSearch(fromHeader = false) {
             const queryFieldId = fromHeader ? 'header-search-input' : 'search-input';
             const query = document.getElementById(queryFieldId).value.trim();
             if(!query) return alert("Enter your search keywords first!");
-
             document.getElementById('search-input').value = query;
             document.getElementById('header-search-input').value = query;
-            
             document.getElementById('landing-portal').style.display = 'none';
             document.getElementById('stream-dashboard-box').style.display = 'none';
             document.getElementById('main-exploration-hub').style.display = 'block';
             document.getElementById('header-search-engine').style.display = 'flex';
-
             document.getElementById('recommendations-container-block').style.display = 'none';
             document.getElementById('sidebar-container-block').style.display = 'none';
             document.getElementById('grid-split-container').style.gridTemplateColumns = "1fr";
-
             document.getElementById('grid-header-title').innerText = `Search Results matching: "${query}"`;
             document.getElementById('results-grid').innerHTML = "<p>Searching catalogs...</p>";
-
             try {
                 const res = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(query)}&limit=16`);
                 const json = await res.json();
-                if(!json.data || json.data.length === 0) {
-                    document.getElementById('results-grid').innerHTML = "<p>No titles matched. Please check your spelling.</p>";
-                } else {
-                    displayGridFeed(json.data, 'results-grid');
-                }
-            } catch (e) {
-                document.getElementById('results-grid').innerHTML = "<p>Search system busy. Try again.</p>";
-            }
+                if(!json.data || json.data.length === 0) document.getElementById('results-grid').innerHTML = "<p>No titles matched.</p>";
+                else displayGridFeed(json.data, 'results-grid');
+            } catch (e) { document.getElementById('results-grid').innerHTML = "<p>Search system busy.</p>"; }
         }
 
-        // Day switch controller wrapper event handler
         function changeScheduleDay(targetDay) {
             activeScheduleDay = targetDay;
             document.querySelectorAll('.schedule-tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -676,72 +641,42 @@
         async function fetchLiveReleasingSchedule(dayMode) {
             const scheduleBox = document.getElementById('schedule-box');
             scheduleBox.innerHTML = '<p style="padding:10px; font-size:13px; color:#888;">Updating timeline...</p>';
-            
             const weekdays = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
             let currentDayIndex = new Date().getDay();
-
-            if (dayMode === 'yesterday') {
-                currentDayIndex = (currentDayIndex - 1 + 7) % 7;
-            } else if (dayMode === 'tomorrow') {
-                currentDayIndex = (currentDayIndex + 1) % 7;
-            }
-
+            if (dayMode === 'yesterday') currentDayIndex = (currentDayIndex - 1 + 7) % 7;
+            else if (dayMode === 'tomorrow') currentDayIndex = (currentDayIndex + 1) % 7;
             const targetDayString = weekdays[currentDayIndex];
-
             try {
                 const response = await fetch(`https://api.jikan.moe/v4/schedules?filter=${targetDayString}&limit=25`);
                 const json = await response.json();
                 const rawAnimeList = json.data || [];
-
-                // STRICT FILTER EXTRACTION: Strip out completed items
-                const ongoingAnime = rawAnimeList.filter(anime => {
-                    return anime.airing === true || anime.status === "Currently Airing";
-                });
-
-                if(ongoingAnime.length === 0) {
-                    scheduleBox.innerHTML = `<p style="padding:10px; font-size:13px; color:#888;">No ongoing broadcasts scheduled.</p>`;
-                    return;
-                }
-
+                const ongoingAnime = rawAnimeList.filter(anime => anime.airing === true || anime.status === "Currently Airing");
+                if(ongoingAnime.length === 0) { scheduleBox.innerHTML = `<p style="padding:10px; font-size:13px; color:#888;">No ongoing broadcasts scheduled.</p>`; return; }
                 scheduleBox.innerHTML = '';
                 ongoingAnime.forEach(anime => {
                     const title = anime.title_english || anime.title;
                     const broadcastTime = anime.broadcast?.time || "Airing";
-                    const totalEpsCount = anime.episodes ? `${anime.episodes} Episodes` : "Ongoing";
-
                     const div = document.createElement('div');
                     div.className = 'schedule-item';
                     div.innerHTML = `
                         <div class="sched-left" onclick="loadStreamingLayout(${anime.mal_id}, '${title.replace(/'/g, "\\'")}', ${anime.episodes || 12})">
                             <div class="sched-title">${title}</div>
-                            <div class="sched-ep">${totalEpsCount}</div>
                         </div>
                         <div class="sched-time">JST ${broadcastTime}</div>
                     `;
                     scheduleBox.appendChild(div);
                 });
-            } catch (error) {
-                scheduleBox.innerHTML = `<p style="padding:10px; font-size:13px; color:#ff4444;">Failed to sync broadcast calendar.</p>`;
-            }
+            } catch (error) { scheduleBox.innerHTML = `<p style="padding:10px; font-size:13px; color:#ff4444;">Failed to sync broadcast calendar.</p>`; }
         }
 
-        function displayScrollFeed(animeArray, elementId, statusTag) {
+        function displayScrollFeed(animeArray, elementId) {
             const container = document.getElementById(elementId);
             container.innerHTML = '';
             animeArray.forEach(anime => {
                 const title = anime.title_english || anime.title;
                 const card = document.createElement('div');
                 card.className = 'anime-card';
-                
-                const totalReleasedCount = anime.episodes ? `${anime.episodes} Episodes` : "Ongoing";
-
-                card.innerHTML = `
-                    <img src="${anime.images?.jpg?.image_url || ''}" alt="poster">
-                    <div class="info-box">
-                        <div class="title">${title}</div>
-                        <div class="meta-tag">${totalReleasedCount}</div>
-                    </div>
-                `;
+                card.innerHTML = `<img src="${anime.images?.jpg?.image_url || ''}"><div class="info-box"><div class="title">${title}</div></div>`;
                 card.onclick = () => loadStreamingLayout(anime.mal_id, title, anime.episodes || 12);
                 container.appendChild(card);
             });
@@ -754,16 +689,7 @@
                 const title = anime.title_english || anime.title;
                 const card = document.createElement('div');
                 card.className = 'anime-card';
-                
-                const totalReleasedCount = anime.episodes ? `${anime.episodes} Episodes` : "Ongoing";
-
-                card.innerHTML = `
-                    <img src="${anime.images?.jpg?.image_url || ''}" alt="poster">
-                    <div class="info-box">
-                        <div class="title">${title}</div>
-                        <div class="meta-tag">${totalReleasedCount}</div>
-                    </div>
-                `;
+                card.innerHTML = `<img src="${anime.images?.jpg?.image_url || ''}"><div class="info-box"><div class="title">${title}</div></div>`;
                 card.onclick = () => loadStreamingLayout(anime.mal_id, title, anime.episodes || 12);
                 container.appendChild(card);
             });
@@ -776,17 +702,7 @@
                 const title = anime.title_english || anime.title;
                 const row = document.createElement('div');
                 row.className = 'top10-item';
-                
-                const totalReleasedCount = anime.episodes ? `${anime.episodes} Eps` : "Ongoing";
-
-                row.innerHTML = `
-                    <div class="top10-rank">${idx + 1}</div>
-                    <img class="top10-thumb" src="${anime.images?.jpg?.small_image_url || anime.images?.jpg?.image_url}" alt="thumb">
-                    <div class="top10-details">
-                        <div class="top10-title">${title}</div>
-                        <div class="top10-stats">${totalReleasedCount} | ★ ${anime.score || '8.5'}</div>
-                    </div>
-                `;
+                row.innerHTML = `<div class="top10-rank">${idx + 1}</div><div class="top10-details"><div class="top10-title">${title}</div></div>`;
                 row.onclick = () => loadStreamingLayout(anime.mal_id, title, anime.episodes || 12);
                 container.appendChild(row);
             });
@@ -796,39 +712,14 @@
             currentMalId = malId;
             useAnikotoFallback = false;
             anikotoEpisodeEmbedIds = [];
-
-            // Reset player box to standard iframe state
             document.getElementById('player-box').innerHTML = '<iframe id="video-iframe" src="" allowfullscreen scrolling="no"></iframe>';
-
             document.getElementById('main-exploration-hub').style.display = 'none';
             document.getElementById('stream-dashboard-box').style.display = 'block';
             document.getElementById('ep-title').innerText = `Watching: ${titleName}`;
             document.getElementById('header-search-engine').style.display = 'flex';
-            
             const epBox = document.getElementById('episode-buttons');
-            epBox.innerHTML = '<p style="font-size:13px; color:#888;">Configuring streams...</p>';
-
-            try {
-                const cleanQuery = titleName.split(':')[0].split('(')[0].trim();
-                const searchRes = await fetch(`https://anikotoapi.site/anime?q=${encodeURIComponent(cleanQuery)}&limit=3`);
-                const searchJson = await searchRes.json();
-                const match = searchJson.data?.[0];
-
-                if (match && match.id) {
-                    const seriesRes = await fetch(`https://anikotoapi.site/series/${match.id}`);
-                    const seriesJson = await seriesRes.json();
-                    if (seriesJson.data && seriesJson.data.episodes) {
-                        anikotoEpisodeEmbedIds = seriesJson.data.episodes.map(ep => ep.episode_embed_id);
-                    }
-                }
-            } catch (e) {
-                console.log("Anikoto fallback lookup skipped.");
-            }
-
             epBox.innerHTML = '';
-            const totalCount = totalEpisodes || anikotoEpisodeEmbedIds.length || 12;
-
-            for (let i = 1; i <= totalCount; i++) {
+            for (let i = 1; i <= totalEpisodes; i++) {
                 const btn = document.createElement('button');
                 btn.className = 'ep-btn';
                 btn.id = `ep-choice-${i}`;
@@ -836,7 +727,6 @@
                 btn.onclick = () => launchVideoPlayer(i);
                 epBox.appendChild(btn);
             }
-            
             launchVideoPlayer(1);
         }
 
@@ -845,38 +735,19 @@
             document.querySelectorAll('.ep-btn').forEach(b => b.classList.remove('active'));
             const activeBtn = document.getElementById(`ep-choice-${epNum}`);
             if (activeBtn) activeBtn.classList.add('active');
-
             const iframe = document.getElementById('video-iframe');
             if (!iframe) return;
-
-            if (useAnikotoFallback && anikotoEpisodeEmbedIds[epNum - 1]) {
-                iframe.src = `${ANIKOTO_PLAYER_BASE}/${anikotoEpisodeEmbedIds[epNum - 1]}/${currentLanguage}`;
-            } else {
-                iframe.src = `${MAL_PLAYER_BASE}/${currentMalId}/${epNum}/${currentLanguage}`;
-            }
-
-            // Set up a structural timeout fallback. If the server does not report healthy within 6 seconds, assume unhosted.
+            iframe.src = `${MAL_PLAYER_BASE}/${currentMalId}/${epNum}/${currentLanguage}`;
             clearTimeout(window.streamLoadGuard);
-            window.streamLoadGuard = setTimeout(() => {
-                handleStreamMissingNotice();
-            }, 6000);
+            window.streamLoadGuard = setTimeout(() => handleStreamMissingNotice(), 8000);
         }
 
         function handleStreamMissingNotice() {
-            if (!useAnikotoFallback && anikotoEpisodeEmbedIds.length > 0) {
-                console.log("MAL failed. Trying Anikoto fallback map...");
-                useAnikotoFallback = true;
-                launchVideoPlayer(currentEpisodeIndex);
-            } else {
-                // Render a clean fallback notification block directly inside the player container instead of breaking
-                document.getElementById('player-box').innerHTML = `
-                    <div style="width:100%; height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center; background:#111; color:#aaa; padding:20px; box-sizing:border-box; font-family:sans-serif;">
-                        <p style="font-size:1.4rem; color:#ff4b2b; margin:0 0 10px 0; font-weight:bold;">⚠️ Video Source Not Available</p>
-                        <p style="font-size:0.95rem; margin:0 0 20px 0; max-width:400px; text-align:center; line-height:1.4;">This video hasn't been hosted or linked by the streaming server network yet.</p>
-                        <button onclick="openExplorationHub()" style="background:var(--accent-color); color:#000; border:none; padding:10px 20px; border-radius:20px; font-weight:bold; cursor:pointer;">Back to Dashboard</button>
-                    </div>
-                `;
-            }
+            document.getElementById('player-box').innerHTML = `
+                <div style="width:100%; height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center; background:#111; color:#aaa; padding:20px; text-align:center;">
+                    <p style="font-size:1.4rem; color:#ff4b2b; font-weight:bold;">⚠️ Video Source Not Available</p>
+                    <button onclick="openExplorationHub()" style="background:var(--accent-color); color:#000; border:none; padding:10px 20px; border-radius:20px; font-weight:bold; cursor:pointer;">Back to Dashboard</button>
+                </div>`;
         }
 
         function setLanguage(lang) {
@@ -889,19 +760,12 @@
         window.addEventListener("message", function (event) {
             let data = event.data;
             if (typeof data === "string") { try { data = JSON.parse(data); } catch (e) { return; } }
-            
-            // Clear the timeout guard if the embed frame signals a healthy status or changes video state successfully
             if (data && (data.event === "playing" || data.event === "ready")) {
                 clearTimeout(window.streamLoadGuard);
             }
-            
             if (data && data.event === "error") {
                 clearTimeout(window.streamLoadGuard);
                 handleStreamMissingNotice();
-            }
-
-            if (data && data.event === "complete") { 
-                launchVideoPlayer(currentEpisodeIndex + 1); 
             }
         });
 

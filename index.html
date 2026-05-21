@@ -48,7 +48,7 @@
         
         /* Persistent Header Search Bar Container */
         .header-search-box {
-            display: none; /* Controlled dynamically by JavaScript state */
+            display: none; 
             flex: 1;
             max-width: 400px;
             background: #1c1c1e;
@@ -457,6 +457,7 @@
 
     <script>
         const MAL_PLAYER_BASE = "https://megaplay.buzz/stream/mal";
+        const ANIKOTO_PLAYER_BASE = "https://megaplay.buzz/stream/s-2"; 
 
         // Global Architectural Application Variables
         let currentEpisodeIndex = 1;
@@ -464,6 +465,10 @@
         let currentMalId = "";
         let selectedBgValue = "pitch-black";
         let rVal = 0, gVal = 255, bVal = 102;
+
+        // Fallback Tracking Arrays
+        let useAnikotoFallback = false;
+        let anikotoEpisodeEmbedIds = []; 
 
         function openBottomSheet() {
             document.getElementById('sheet-overlay').style.display = 'block';
@@ -537,12 +542,11 @@
         // NAVIGATOR SWITCH: TRANSITION INTO EXPLORATION MODE HUB
         function openExplorationHub() {
             document.getElementById('landing-portal').style.display = 'none';
+            document.getElementById('stream-dashboard-box').style.display = 'none';
             document.getElementById('main-exploration-hub').style.display = 'block';
             
-            // Render persistent top search bar layout header
             document.getElementById('header-search-engine').style.display = 'flex';
             
-            // Re-enable and show default sections
             document.getElementById('recommendations-container-block').style.display = 'block';
             document.getElementById('sidebar-container-block').style.display = 'block';
             document.getElementById('grid-split-container').style.gridTemplateColumns = "1fr 320px";
@@ -586,17 +590,14 @@
             const query = document.getElementById(queryFieldId).value.trim();
             if(!query) return alert("Enter your search keywords first!");
 
-            // Sync structural text parameters across input fields
             document.getElementById('search-input').value = query;
             document.getElementById('header-search-input').value = query;
             
-            // Instantly route frames out of initial screen state if needed
             document.getElementById('landing-portal').style.display = 'none';
             document.getElementById('stream-dashboard-box').style.display = 'none';
             document.getElementById('main-exploration-hub').style.display = 'block';
             document.getElementById('header-search-engine').style.display = 'flex';
 
-            // CRITICAL REQUIREMENT RULE: Completely strip out recommendations, upcoming timeline & top lists blocks
             document.getElementById('recommendations-container-block').style.display = 'none';
             document.getElementById('sidebar-container-block').style.display = 'none';
             document.getElementById('grid-split-container').style.gridTemplateColumns = "1fr";
@@ -721,18 +722,41 @@
             });
         }
 
-        function loadStreamingLayout(malId, titleName, totalEpisodes) {
+        async function loadStreamingLayout(malId, titleName, totalEpisodes) {
             currentMalId = malId;
+            useAnikotoFallback = false;
+            anikotoEpisodeEmbedIds = [];
+
+            // Reset player box to standard iframe state
+            document.getElementById('player-box').innerHTML = '<iframe id="video-iframe" src="" allowfullscreen scrolling="no"></iframe>';
+
             document.getElementById('main-exploration-hub').style.display = 'none';
             document.getElementById('stream-dashboard-box').style.display = 'block';
             document.getElementById('ep-title').innerText = `Watching: ${titleName}`;
-            
-            // Keep the search bar active when watching in portrait mode
             document.getElementById('header-search-engine').style.display = 'flex';
             
             const epBox = document.getElementById('episode-buttons');
+            epBox.innerHTML = '<p style="font-size:13px; color:#888;">Configuring streams...</p>';
+
+            try {
+                const cleanQuery = titleName.split(':')[0].split('(')[0].trim();
+                const searchRes = await fetch(`https://anikotoapi.site/anime?q=${encodeURIComponent(cleanQuery)}&limit=3`);
+                const searchJson = await searchRes.json();
+                const match = searchJson.data?.[0];
+
+                if (match && match.id) {
+                    const seriesRes = await fetch(`https://anikotoapi.site/series/${match.id}`);
+                    const seriesJson = await seriesRes.json();
+                    if (seriesJson.data && seriesJson.data.episodes) {
+                        anikotoEpisodeEmbedIds = seriesJson.data.episodes.map(ep => ep.episode_embed_id);
+                    }
+                }
+            } catch (e) {
+                console.log("Anikoto fallback lookup skipped.");
+            }
+
             epBox.innerHTML = '';
-            const totalCount = totalEpisodes || 24;
+            const totalCount = totalEpisodes || anikotoEpisodeEmbedIds.length || 12;
 
             for (let i = 1; i <= totalCount; i++) {
                 const btn = document.createElement('button');
@@ -742,6 +766,7 @@
                 btn.onclick = () => launchVideoPlayer(i);
                 epBox.appendChild(btn);
             }
+            
             launchVideoPlayer(1);
         }
 
@@ -750,7 +775,38 @@
             document.querySelectorAll('.ep-btn').forEach(b => b.classList.remove('active'));
             const activeBtn = document.getElementById(`ep-choice-${epNum}`);
             if (activeBtn) activeBtn.classList.add('active');
-            document.getElementById('video-iframe').src = `${MAL_PLAYER_BASE}/${currentMalId}/${epNum}/${currentLanguage}`;
+
+            const iframe = document.getElementById('video-iframe');
+            if (!iframe) return;
+
+            if (useAnikotoFallback && anikotoEpisodeEmbedIds[epNum - 1]) {
+                iframe.src = `${ANIKOTO_PLAYER_BASE}/${anikotoEpisodeEmbedIds[epNum - 1]}/${currentLanguage}`;
+            } else {
+                iframe.src = `${MAL_PLAYER_BASE}/${currentMalId}/${epNum}/${currentLanguage}`;
+            }
+
+            // Set up a structural timeout fallback. If the server does not report healthy within 6 seconds, assume unhosted.
+            clearTimeout(window.streamLoadGuard);
+            window.streamLoadGuard = setTimeout(() => {
+                handleStreamMissingNotice();
+            }, 6000);
+        }
+
+        function handleStreamMissingNotice() {
+            if (!useAnikotoFallback && anikotoEpisodeEmbedIds.length > 0) {
+                console.log("MAL failed. Trying Anikoto fallback map...");
+                useAnikotoFallback = true;
+                launchVideoPlayer(currentEpisodeIndex);
+            } else {
+                // Render a clean fallback notification block directly inside the player container instead of breaking
+                document.getElementById('player-box').innerHTML = `
+                    <div style="width:100%; height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center; background:#111; color:#aaa; padding:20px; box-sizing:border-box; font-family:sans-serif;">
+                        <p style="font-size:1.4rem; color:#ff4b2b; margin:0 0 10px 0; font-weight:bold;">⚠️ Video Source Not Available</p>
+                        <p style="font-size:0.95rem; margin:0 0 20px 0; max-width:400px; text-align:center; line-height:1.4;">This video hasn't been hosted or linked by the streaming server network yet.</p>
+                        <button onclick="openExplorationHub()" style="background:var(--accent-color); color:#000; border:none; padding:10px 20px; border-radius:20px; font-weight:bold; cursor:pointer;">Back to Dashboard</button>
+                    </div>
+                `;
+            }
         }
 
         function setLanguage(lang) {
@@ -763,7 +819,20 @@
         window.addEventListener("message", function (event) {
             let data = event.data;
             if (typeof data === "string") { try { data = JSON.parse(data); } catch (e) { return; } }
-            if (data && data.event === "complete") { launchVideoPlayer(currentEpisodeIndex + 1); }
+            
+            // Clear the timeout guard if the embed frame signals a healthy status or changes video state successfully
+            if (data && (data.event === "playing" || data.event === "ready")) {
+                clearTimeout(window.streamLoadGuard);
+            }
+            
+            if (data && data.event === "error") {
+                clearTimeout(window.streamLoadGuard);
+                handleStreamMissingNotice();
+            }
+
+            if (data && data.event === "complete") { 
+                launchVideoPlayer(currentEpisodeIndex + 1); 
+            }
         });
 
         window.onload = loadSavedTheme;

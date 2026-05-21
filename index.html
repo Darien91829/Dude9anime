@@ -8,7 +8,7 @@
         :root {
             --bg-color: #050505;
             --container-bg: #111111;
-            --accent-color: #00ff66; /* Default Matrix Green */
+            --accent-color: rgb(0, 255, 102); 
             --text-color: #ffffff;
             --muted-text: #888888;
         }
@@ -87,10 +87,10 @@
         .slider-row { display: flex; align-items: center; margin-bottom: 10px; gap: 10px; }
         .slider-row:last-child { margin-bottom: 0; }
         .slider-row label { width: 20px; font-weight: bold; font-size: 14px; }
-        .slider-row input[type="range"] { flex: 1; accent-color: var(--accent-color); }
+        .slider-row input[type="range"] { flex: 1; }
         .slider-row span { width: 35px; text-align: right; font-size: 13px; font-family: monospace; color: #aaa; }
         
-        .color-preview-box { height: 35px; border-radius: 6px; border: 1px solid #444; margin-top: 10px; background: var(--accent-color); }
+        .color-preview-box { height: 35px; border-radius: 6px; border: 1px solid #444; margin-top: 10px; }
 
         /* Custom Background Selector Cards */
         .custom-options-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
@@ -109,7 +109,7 @@
     <p>Your Next Anime Adventure Awaits</p>
 
     <div class="search-box">
-        <input type="text" id="search-input" placeholder="Search anime by title (e.g. Naruto, Bleach, One Piece)...">
+        <input type="text" id="search-input" placeholder="Search anime by title (e.g. Naruto, One Piece)...">
         <button class="search-btn" onclick="searchAnime()">Search</button>
     </div>
 
@@ -155,8 +155,8 @@
 
             <div class="theme-section-title">Background Theme</div>
             <div class="custom-options-grid" id="bg-tiles-container">
-                <div class="option-tile selected" data-value="pitch-black" onclick="selectBgTile('pitch-black', this)">Pitch Black</div>
-                <div class="option-tile" data-value="dark-gray" onclick="selectBgTile('dark-gray', this)">Dark Charcoal</div>
+                <div class="option-tile selected" data-value="pitch-black" id="tile-pitch-black" onclick="selectBgTile('pitch-black')">Pitch Black</div>
+                <div class="option-tile" data-value="dark-gray" id="tile-dark-gray" onclick="selectBgTile('dark-gray')">Dark Charcoal</div>
             </div>
 
             <button class="save-theme-btn" onclick="saveTheme()">Apply Configurations</button>
@@ -177,6 +177,9 @@
 
         function toggleModal(show) {
             document.getElementById('settings-modal').style.display = show ? 'flex' : 'none';
+            if(show) {
+                updateRgbMixer();
+            }
         }
 
         // Real-time RGB visual feedback as the user drags sliders
@@ -193,9 +196,10 @@
             document.getElementById('rgb-preview').style.backgroundColor = hexColor;
         }
 
-        function selectBgTile(value, element) {
+        function selectBgTile(value) {
             document.querySelectorAll('#bg-tiles-container .option-tile').forEach(t => t.classList.remove('selected'));
-            element.classList.add('selected');
+            const activeTile = document.getElementById(`tile-${value}`);
+            if(activeTile) activeTile.classList.add('selected');
             selectedBgValue = value;
         }
 
@@ -211,6 +215,7 @@
 
             // Persist parameters inside local storage memory
             localStorage.setItem('dude9anime-r', rVal);
+            localStorage.setItem('localStorage-g', gVal); //
             localStorage.setItem('dude9anime-g', gVal);
             localStorage.setItem('dude9anime-b', bVal);
             localStorage.setItem('dude9anime-bg', selectedBgValue);
@@ -229,7 +234,6 @@
                 document.getElementById('range-r').value = rVal;
                 document.getElementById('range-g').value = gVal;
                 document.getElementById('range-b').value = bVal;
-                updateRgbMixer();
                 document.documentElement.style.setProperty('--accent-color', `rgb(${rVal}, ${gVal}, ${bVal})`);
             }
             if (savedBgMode) {
@@ -238,9 +242,10 @@
                 if (savedBgMode === "dark-gray") { bg = "#1a1a1e"; container = "#252529"; }
                 document.documentElement.style.setProperty('--bg-color', bg);
                 document.documentElement.style.setProperty('--container-bg', container);
-                document.querySelectorAll('#bg-tiles-container .option-tile').forEach(tile => {
-                    tile.classList.toggle('selected', tile.getAttribute('data-value') === savedBgMode);
-                });
+                
+                document.querySelectorAll('#bg-tiles-container .option-tile').forEach(t => t.classList.remove('selected'));
+                const activeTile = document.getElementById(`tile-${savedBgMode}`);
+                if(activeTile) activeTile.classList.add('selected');
             }
         }
 
@@ -266,7 +271,6 @@
             document.getElementById('grid-header').innerText = `Search Results for: "${query}"`;
             
             try {
-                // Fetch direct text-matching queries straight from public database indexes
                 const res = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(query)}&limit=16`);
                 const json = await res.json();
                 
@@ -288,7 +292,6 @@
             animeDataArray.forEach(anime => {
                 const card = document.createElement('div');
                 card.className = 'anime-card';
-                // Pull title and standardized high quality poster images
                 const title = anime.title_english || anime.title;
                 const image = anime.images?.jpg?.large_image_url || anime.images?.jpg?.image_url;
                 
@@ -296,7 +299,6 @@
                     <img src="${image || 'https://via.placeholder.com/150x225?text=No+Poster'}" alt="Poster">
                     <div class="title">${title}</div>
                 `;
-                // Map item click to activate MegaPlay multi-server catalog stream configurations using mal_id
                 card.onclick = () => loadStreamingLayout(anime.mal_id, title, anime.episodes || 24);
                 grid.appendChild(card);
             });
@@ -316,10 +318,8 @@
             const epBox = document.getElementById('episode-buttons');
             epBox.innerHTML = '';
 
-            // Handle situations where total episodes are unknown/continuous 
             const totalCount = totalEpisodes || 50;
 
-            // Generate full selection panels matching available streams completely automatically
             for (let i = 1; i <= totalCount; i++) {
                 const btn = document.createElement('button');
                 btn.className = 'ep-btn';
@@ -338,8 +338,7 @@
             const activeBtn = document.getElementById(`ep-choice-${epNum}`);
             if (activeBtn) activeBtn.classList.add('active');
 
-            // Formulate endpoint utilizing direct high-capacity server matching matrices
-            [span_0](start_span)const streamUrl = `${MAL_PLAYER_BASE}/${currentMalId}/${epNum}/${currentLanguage}`;[span_0](end_span)
+            const streamUrl = `${MAL_PLAYER_BASE}/${currentMalId}/${epNum}/${currentLanguage}`;
             document.getElementById('video-iframe').src = streamUrl;
         }
 
@@ -350,14 +349,13 @@
             launchVideoPlayer(currentEpisodeIndex);
         }
 
-        // Auto-Next Message Engine Hook from MegaPlay Ecosystem Logs
         window.addEventListener("message", function (event) {
             let data = event.data;
             if (typeof data === "string") {
                 try { data = JSON.parse(data); } catch (e) { return; }
             }
 
-            [span_1](start_span)if (data && data.event === "complete") {[span_1](end_span)
+            if (data && data.event === "complete") {
                 launchVideoPlayer(currentEpisodeIndex + 1);
             }
         });

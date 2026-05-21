@@ -142,18 +142,18 @@
         }
 
         .watch-now-btn {
-            background: rgb(255, 75, 43);
-            color: white;
+            background: var(--accent-color);
+            color: #000;
             font-size: 1.2rem;
             font-weight: bold;
             border: none;
             padding: 16px 50px;
             border-radius: 35px;
             cursor: pointer;
-            box-shadow: 0 4px 20px rgba(255, 75, 43, 0.5);
+            box-shadow: 0 4px 20px rgba(0, 255, 102, 0.3);
             text-transform: uppercase;
             letter-spacing: 1px;
-            transition: transform 0.2s, background 0.2s;
+            transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
         }
         .watch-now-btn:active { transform: scale(0.95); }
 
@@ -231,8 +231,47 @@
         .anime-card .title { font-size: 0.85rem; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-color); margin-bottom: 4px; }
         .anime-card .meta-tag { font-size: 0.75rem; color: var(--accent-color); font-weight: 500; }
 
-        /* Airing Calendars & Widget Subsections */
-        .schedule-list { background: var(--container-bg); border-radius: 12px; padding: 15px; border: 1px solid #1c1c1e; max-height: 420px; overflow-y: auto; }
+        /* Airing Calendars Day Navigation Switcher Components */
+        .schedule-tabs {
+            display: flex;
+            background: var(--container-bg);
+            border: 1px solid #1c1c1e;
+            border-bottom: none;
+            border-radius: 12px 12px 0 0;
+            padding: 6px;
+            gap: 6px;
+        }
+        .schedule-tab-btn {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--muted-text);
+            padding: 10px 0;
+            font-size: 13px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+        }
+        .schedule-tab-btn:hover {
+            color: #fff;
+            background: rgba(255,255,255,0.03);
+        }
+        .schedule-tab-btn.active {
+            color: #000;
+            background: var(--accent-color);
+            box-shadow: 0 2px 8px rgba(0, 255, 102, 0.2);
+        }
+
+        .schedule-list { 
+            background: var(--container-bg); 
+            border-radius: 0 0 12px 12px; 
+            padding: 15px; 
+            border: 1px solid #1c1c1e; 
+            max-height: 380px; 
+            overflow-y: auto; 
+        }
         .schedule-list::-webkit-scrollbar { width: 4px; }
         .schedule-list::-webkit-scrollbar-thumb { background: #2c2c2e; border-radius: 2px; }
         
@@ -387,9 +426,16 @@
 
             <div class="side-panel" id="sidebar-container-block">
                 
-                <div class="section-header" style="margin-top: 0;">
-                    <h2 class="section-title">Upcoming Releases Today</h2>
+                <div class="section-header" style="margin-top: 0; margin-bottom: 10px;">
+                    <h2 class="section-title">Broadcast Schedule</h2>
                 </div>
+                
+                <div class="schedule-tabs">
+                    <button id="tab-yesterday" class="schedule-tab-btn" onclick="changeScheduleDay('yesterday')">Yesterday</button>
+                    <button id="tab-today" class="schedule-tab-btn active" onclick="changeScheduleDay('today')">Today</button>
+                    <button id="tab-tomorrow" class="schedule-tab-btn" onclick="changeScheduleDay('tomorrow')">Tomorrow</button>
+                </div>
+                
                 <div class="schedule-list" id="schedule-box">
                     <p style="padding:10px; font-size:13px; color:#888;">Syncing broadcast index...</p>
                 </div>
@@ -465,6 +511,7 @@
         let currentMalId = "";
         let selectedBgValue = "pitch-black";
         let rVal = 0, gVal = 255, bVal = 102;
+        let activeScheduleDay = 'today';
 
         // Fallback Tracking Arrays
         let useAnikotoFallback = false;
@@ -526,7 +573,7 @@
                 document.getElementById('range-r').value = rVal;
                 document.getElementById('range-g').value = gVal;
                 document.getElementById('range-b').value = bVal;
-                document.documentElement.style.setProperty('--accent-color', `rgb(${rVal}, ${gVal}, ${bVal})`);
+                document.documentElement.style.setProperty('--accent-color', `rgb(${savedR}, ${savedG}, ${savedB})`);
             }
             if (savedBgMode) {
                 selectedBgValue = savedBgMode;
@@ -567,7 +614,7 @@
 
         // CORE SYSTEM ASYNCHRONOUS DATA CAPTURING LIFECYCLES
         async function loadMainHubFeeds() {
-            fetchLiveReleasingSchedule();
+            fetchLiveReleasingSchedule(activeScheduleDay);
             
             try {
                 const res = await fetch("https://api.jikan.moe/v4/top/anime?limit=22");
@@ -618,23 +665,46 @@
             }
         }
 
-        async function fetchLiveReleasingSchedule() {
+        // Day switch controller wrapper event handler
+        function changeScheduleDay(targetDay) {
+            activeScheduleDay = targetDay;
+            document.querySelectorAll('.schedule-tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`tab-${targetDay}`).classList.add('active');
+            fetchLiveReleasingSchedule(targetDay);
+        }
+
+        async function fetchLiveReleasingSchedule(dayMode) {
             const scheduleBox = document.getElementById('schedule-box');
+            scheduleBox.innerHTML = '<p style="padding:10px; font-size:13px; color:#888;">Updating timeline...</p>';
+            
             const weekdays = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
-            const currentDayString = weekdays[new Date().getDay()];
+            let currentDayIndex = new Date().getDay();
+
+            if (dayMode === 'yesterday') {
+                currentDayIndex = (currentDayIndex - 1 + 7) % 7;
+            } else if (dayMode === 'tomorrow') {
+                currentDayIndex = (currentDayIndex + 1) % 7;
+            }
+
+            const targetDayString = weekdays[currentDayIndex];
 
             try {
-                const response = await fetch(`https://api.jikan.moe/v4/schedules?filter=${currentDayString}&limit=12`);
+                const response = await fetch(`https://api.jikan.moe/v4/schedules?filter=${targetDayString}&limit=25`);
                 const json = await response.json();
-                const animeToday = json.data || [];
+                const rawAnimeList = json.data || [];
 
-                if(animeToday.length === 0) {
-                    scheduleBox.innerHTML = `<p style="padding:10px; font-size:13px; color:#888;">No entries scheduled for today.</p>`;
+                // STRICT FILTER EXTRACTION: Strip out completed items
+                const ongoingAnime = rawAnimeList.filter(anime => {
+                    return anime.airing === true || anime.status === "Currently Airing";
+                });
+
+                if(ongoingAnime.length === 0) {
+                    scheduleBox.innerHTML = `<p style="padding:10px; font-size:13px; color:#888;">No ongoing broadcasts scheduled.</p>`;
                     return;
                 }
 
                 scheduleBox.innerHTML = '';
-                animeToday.forEach(anime => {
+                ongoingAnime.forEach(anime => {
                     const title = anime.title_english || anime.title;
                     const broadcastTime = anime.broadcast?.time || "Airing";
                     const totalEpsCount = anime.episodes ? `${anime.episodes} Episodes` : "Ongoing";
@@ -644,14 +714,14 @@
                     div.innerHTML = `
                         <div class="sched-left" onclick="loadStreamingLayout(${anime.mal_id}, '${title.replace(/'/g, "\\'")}', ${anime.episodes || 12})">
                             <div class="sched-title">${title}</div>
-                            <div class="sched-ep">${totalEpsCount} | Total</div>
+                            <div class="sched-ep">${totalEpsCount}</div>
                         </div>
                         <div class="sched-time">JST ${broadcastTime}</div>
                     `;
                     scheduleBox.appendChild(div);
                 });
             } catch (error) {
-                scheduleBox.innerHTML = `<p style="padding:10px; font-size:13px; color:#ff4444;">Failed to sync today's broadcast calendar.</p>`;
+                scheduleBox.innerHTML = `<p style="padding:10px; font-size:13px; color:#ff4444;">Failed to sync broadcast calendar.</p>`;
             }
         }
 

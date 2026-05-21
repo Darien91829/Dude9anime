@@ -46,6 +46,12 @@
             white-space: nowrap;
         }
         
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
         /* Persistent Header Search Bar Container */
         .header-search-box {
             display: none; 
@@ -77,13 +83,16 @@
             cursor: pointer;
         }
 
-        .settings-icon {
+        .settings-icon, .auth-trigger-icon {
             font-size: 24px;
             cursor: pointer;
             background: none;
             border: none;
             color: var(--accent-color);
             padding: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         /* PAGE 1: EXCLUSIVE INITIAL LANDING CANVAS */
@@ -323,14 +332,70 @@
         }
         iframe { width: 100%; height: 100%; border: none; }
 
+        .player-meta-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 25px;
+            gap: 15px;
+        }
+        .watchlist-toggle-btn {
+            background: #1c1c1e;
+            border: 1px solid #2c2c2e;
+            color: #fff;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+        .watchlist-toggle-btn.on-list {
+            background: rgba(0, 255, 102, 0.1);
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
         .audio-toggle-container { margin: 15px auto; display: flex; justify-content: center; gap: 10px; }
         .audio-btn { background: #1c1c1e; color: #fff; border: 1px solid #2c2c2e; padding: 8px 20px; border-radius: 20px; font-size: 14px; cursor: pointer; font-weight: bold; }
         .audio-btn.active { background: var(--accent-color); color: #000; border-color: var(--accent-color); }
 
-        .ep-title { color: var(--accent-color); font-size: 1.3rem; margin-top: 25px; font-weight: bold; text-align: left; }
+        .ep-title { color: var(--accent-color); font-size: 1.3rem; margin: 0; font-weight: bold; text-align: left; }
         .episode-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 15px 0 40px 0; }
         .ep-btn { background: var(--container-bg); color: var(--text-color); border: 1px solid #222; padding: 10px 18px; font-size: 14px; border-radius: 6px; cursor: pointer; min-width: 65px; text-align: center; }
         .ep-btn:hover, .ep-btn.active { background: var(--accent-color); color: #000; border-color: var(--accent-color); font-weight: bold; box-shadow: 0 0 8px var(--accent-color); }
+
+        /* AUTH POPUP MODAL LAYER */
+        .modal-overlay { 
+            display: none; 
+            position: fixed; 
+            top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.85); 
+            z-index: 2000; 
+            justify-content: center; 
+            align-items: center; 
+            padding: 20px; 
+            box-sizing: border-box; 
+        }
+        .modal-card { 
+            background: #111; 
+            border: 1px solid #222; 
+            border-radius: 12px; 
+            width: 100%; 
+            max-width: 360px; 
+            padding: 25px; 
+            box-sizing: border-box; 
+            text-align: center; 
+        }
+        .modal-card h3 { margin-top: 0; color: var(--accent-color); font-size: 1.3rem; }
+        .modal-card input { width: 100%; background: #1c1c1e; border: 1px solid #2c2c2e; border-radius: 8px; padding: 12px; margin-bottom: 12px; color: #fff; box-sizing: border-box; outline: none; }
+        .modal-card button { width: 100%; background: var(--accent-color); color: #000; border: none; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; margin-top: 5px; }
+        .modal-card .switch-mode-text { font-size: 12px; color: var(--muted-text); margin-top: 15px; cursor: pointer; }
+        .modal-card .switch-mode-text span { color: var(--accent-color); text-decoration: underline; }
+        .close-modal-btn { background: none; border: none; color: #ff4444; font-size: 12px; margin-top: 15px; cursor: pointer; text-decoration: underline; width: auto !important; }
 
         /* DRAWER BOTTOM SHEETS */
         .bottom-sheet-overlay { 
@@ -381,7 +446,7 @@
         /* LANDSCAPE STREAMING FULLSCREEN CONFIGURATIONS */
         @media (orientation: landscape) and (max-height: 500px) {
             body { padding: 0; background: #000; }
-            header, .landing-screen, .portal-dashboard, .bottom-sheet-overlay, .bottom-sheet, .audio-toggle-container, .ep-title, .episode-list { 
+            header, .landing-screen, .portal-dashboard, .bottom-sheet-overlay, .bottom-sheet, .audio-toggle-container, .player-meta-bar, .episode-list { 
                 display: none !important; 
             }
             .stream-view { display: block !important; padding: 0; margin: 0; max-width: 100vw; }
@@ -401,7 +466,10 @@
             <button class="header-search-btn" onclick="triggerCatalogSearch(true)">Search</button>
         </div>
 
-        <button class="settings-icon" onclick="openBottomSheet()">⚙️</button>
+        <div class="header-actions">
+            <button class="auth-trigger-icon" onclick="openProfileModal()">👤</button>
+            <button class="settings-icon" onclick="openBottomSheet()">⚙️</button>
+        </div>
     </header>
 
     <div id="landing-portal" class="landing-screen">
@@ -417,6 +485,14 @@
     <div id="main-exploration-hub" class="portal-dashboard">
         <div class="content-container" id="grid-split-container">
             <div class="main-panel">
+                
+                <div id="watchlist-wrapper-section" style="display: none;">
+                    <div class="section-header">
+                        <h2 class="section-title">My Watch List</h2>
+                    </div>
+                    <div id="my-watchlist-grid" class="anime-grid"></div>
+                </div>
+
                 <div id="recommendations-container-block">
                     <div class="section-header">
                         <h2 class="section-title">Editor Recommendations</h2>
@@ -464,8 +540,18 @@
             <button id="dub-btn" class="audio-btn" onclick="setLanguage('dub')">DUB</button>
         </div>
 
-        <h3 id="ep-title" class="ep-title">Available Episodes</h3>
+        <div class="player-meta-bar">
+            <h3 id="ep-title" class="ep-title">Available Episodes</h3>
+            <button id="watchlist-toggle-btn" class="watchlist-toggle-btn" onclick="toggleWatchlistEntry()">
+                <span>+</span> Add to List
+            </button>
+        </div>
+        
         <div id="episode-buttons" class="episode-list"></div>
+    </div>
+
+    <div id="auth-modal" class="modal-overlay" onclick="if(event.target===this) closeProfileModal()">
+        <div class="modal-card" id="modal-content-box"></div>
     </div>
 
     <div id="sheet-overlay" class="bottom-sheet-overlay" onclick="closeBottomSheet()"></div>
@@ -502,12 +588,219 @@
         <button class="done-btn" onclick="saveThemeAndClose()">Done</button>
     </div>
 
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Integrated using your exact Firebase Project configurations
+        const firebaseConfig = {
+            apiKey: "AIzaSyCjMNzlM-TqGf5Q34rgmtzH90G4jb40Jaw",
+            authDomain: "dude9anime.firebaseapp.com",
+            projectId: "dude9anime",
+            storageBucket: "dude9anime.firebasestorage.app",
+            messagingSenderId: "943197492354",
+            appId: "1:943197492354:web:8a9ad93a497aee3a6cd09b",
+            measurementId: "G-12B452FLD7"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        window.currentUser = null;
+        window.userWatchlist = [];
+        window.isLoginMode = true;
+
+        // Monitor state of active authenticated accounts
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                window.currentUser = user;
+                await syncUserWatchlistData();
+            } else {
+                window.currentUser = null;
+                window.userWatchlist = [];
+                const wlWrapper = document.getElementById('watchlist-wrapper-section');
+                if (wlWrapper) wlWrapper.style.display = 'none';
+            }
+            updateWatchlistButtonUI();
+        });
+
+        async function syncUserWatchlistData() {
+            if (!window.currentUser) return;
+            const docRef = doc(db, "users", window.currentUser.uid);
+            try {
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    window.userWatchlist = docSnap.data().watchlist || [];
+                } else {
+                    await setDoc(docRef, { watchlist: [] });
+                    window.userWatchlist = [];
+                }
+                renderWatchlistGridRow();
+            } catch (e) { console.error("Cloud synchronizer error:", e); }
+        }
+
+        function renderWatchlistGridRow() {
+            const wrapper = document.getElementById('watchlist-wrapper-section');
+            const grid = document.getElementById('my-watchlist-grid');
+            if (!wrapper || !grid) return;
+            grid.innerHTML = "";
+
+            if (!window.currentUser || window.userWatchlist.length === 0) {
+                wrapper.style.display = 'none';
+                return;
+            }
+
+            wrapper.style.display = 'block';
+            window.userWatchlist.forEach(anime => {
+                const card = document.createElement('div');
+                card.className = 'anime-card';
+                card.style.flex = "unset";
+                card.innerHTML = `<img src="${anime.img}"><div class="info-box"><div class="title">${anime.title}</div></div>`;
+                card.onclick = () => window.loadStreamingLayout(anime.id, anime.title, anime.eps, anime.img);
+                grid.appendChild(card);
+            });
+        }
+
+        window.toggleWatchlistEntry = async function() {
+            if (!window.currentUser) {
+                alert("Please tap the account profile icon at the top to secure an account before creating playlists!");
+                return;
+            }
+
+            const docRef = doc(db, "users", window.currentUser.uid);
+            const entryItem = { 
+                id: window.currentMalId, 
+                title: window.activeAnimeTitle, 
+                eps: window.activeMaxEpisodes, 
+                img: window.activeImgUrl 
+            };
+            
+            const alreadySaved = window.userWatchlist.some(a => String(a.id) === String(window.currentMalId));
+
+            try {
+                if (alreadySaved) {
+                    const matchItem = window.userWatchlist.find(a => String(a.id) === String(window.currentMalId));
+                    window.userWatchlist = window.userWatchlist.filter(a => String(a.id) !== String(window.currentMalId));
+                    await updateDoc(docRef, { watchlist: arrayRemove(matchItem || entryItem) });
+                } else {
+                    window.userWatchlist.push(entryItem);
+                    await updateDoc(docRef, { watchlist: arrayUnion(entryItem) });
+                }
+                updateWatchlistButtonUI();
+                renderWatchlistGridRow();
+            } catch(err) { alert("Error updating watchlist cloud array."); }
+        };
+
+        function updateWatchlistButtonUI() {
+            const btn = document.getElementById('watchlist-toggle-btn');
+            if(!btn) return;
+            const alreadySaved = window.userWatchlist.some(a => String(a.id) === String(window.currentMalId));
+            if (alreadySaved) {
+                btn.className = "watchlist-toggle-btn on-list";
+                btn.innerHTML = `<span>✓</span> Saved to List`;
+            } else {
+                btn.className = "watchlist-toggle-btn";
+                btn.innerHTML = `<span>+</span> Add to List`;
+            }
+        }
+
+        window.openProfileModal = function() {
+            document.getElementById('auth-modal').style.display = 'flex';
+            renderModalContent();
+        };
+
+        window.closeProfileModal = function() {
+            document.getElementById('auth-modal').style.display = 'none';
+        };
+
+        window.toggleAuthMode = function() {
+            window.isLoginMode = !window.isLoginMode;
+            renderModalContent();
+        };
+
+        function renderModalContent() {
+            const container = document.getElementById('modal-content-box');
+            if (window.currentUser) {
+                container.innerHTML = `
+                    <h3>Your Watchlist Profile</h3>
+                    <p style="font-size: 13px; color: #888; margin-bottom: 20px;">Authenticated secure via: <br><b style="color:#fff;">${window.currentUser.email}</b></p>
+                    <button id="signout-submit-btn">Sign Out</button>
+                    <button class="close-modal-btn" onclick="closeProfileModal()">Close</button>
+                `;
+                document.getElementById('signout-submit-btn').onclick = window.handleLogOut;
+            } else {
+                container.innerHTML = `
+                    <h3>${window.isLoginMode ? 'Sign In Securely' : 'Create Account'}</h3>
+                    <input type="email" id="auth-email" placeholder="Email Address">
+                    <input type="password" id="auth-pass" placeholder="Password">
+                    <button id="auth-submit-btn">${window.isLoginMode ? 'Login' : 'Register'}</button>
+                    <p class="switch-mode-text" onclick="toggleAuthMode()">
+                        ${window.isLoginMode ? "Don't have an account? <span>Register</span>" : "Already verified? <span>Login</span>"}
+                    </p>
+                    <button class="close-modal-btn" onclick="closeProfileModal()">Cancel</button>
+                `;
+                document.getElementById('auth-submit-btn').onclick = window.processAuthSubmission;
+            }
+        }
+
+        window.processAuthSubmission = async function() {
+            const email = document.getElementById('auth-email').value.trim();
+            const pass = document.getElementById('auth-pass').value.trim();
+            if(!email || !pass) { alert("Missing credentials."); return; }
+
+            try {
+                if (window.isLoginMode) {
+                    await signInWithEmailAndPassword(auth, email, pass);
+                } else {
+                    await createUserWithEmailAndPassword(auth, email, pass);
+                }
+                closeProfileModal();
+            } catch (err) { alert(err.message); }
+        };
+
+        window.handleLogOut = async function() {
+            await signOut(auth);
+            closeProfileModal();
+        };
+
+        // Hook trigger layout to ensure variables populate correctly
+        const nativeLoader = window.loadStreamingLayout;
+        window.loadStreamingLayout = async function(malId, titleName, totalEpisodes, imgUrl = "") {
+            window.currentMalId = malId;
+            window.activeAnimeTitle = titleName;
+            window.activeMaxEpisodes = totalEpisodes;
+            window.activeImgUrl = imgUrl || "https://images.alphacoders.com/134/1344238.png";
+            updateWatchlistButtonUI();
+            
+            if (nativeLoader) nativeLoader(malId, titleName, totalEpisodes);
+        };
+        
+        // Ensure home reset also triggers checklist updates
+        const nativeReset = window.homeReturnReset;
+        window.homeReturnReset = function() {
+            if(nativeReset) nativeReset();
+            renderWatchlistGridRow();
+        };
+
+        const nativeHubLoader = window.openExplorationHub;
+        window.openExplorationHub = function() {
+            if(nativeHubLoader) nativeHubLoader();
+            renderWatchlistGridRow();
+        };
+    </script>
+
     <script>
         const MAL_PLAYER_BASE = "https://megaplay.buzz/stream/mal";
 
         let currentEpisodeIndex = 1;
         let currentLanguage = 'sub';
-        let currentMalId = "";
+        window.currentMalId = "";
+        window.activeAnimeTitle = "";
+        window.activeMaxEpisodes = 12;
+        window.activeImgUrl = "";
+        
         let selectedBgValue = "pitch-black";
         let rVal = 0, gVal = 255, bVal = 102;
         let activeScheduleDay = 'today';
@@ -690,10 +983,11 @@
                 ongoingAnime.forEach(anime => {
                     const title = anime.title_english || anime.title;
                     const broadcastTime = anime.broadcast?.time || "Airing";
+                    const imgUrl = anime.images?.jpg?.image_url || "";
                     const div = document.createElement('div');
                     div.className = 'schedule-item';
                     div.innerHTML = `
-                        <div class="sched-left" onclick="loadStreamingLayout(${anime.mal_id}, '${title.replace(/'/g, "\\'")}', ${anime.episodes || 12})">
+                        <div class="sched-left" onclick="loadStreamingLayout(${anime.mal_id}, '${title.replace(/'/g, "\\'")}', ${anime.episodes || 12}, '${imgUrl}')">
                             <div class="sched-title">${title}</div>
                         </div>
                         <div class="sched-time">JST ${broadcastTime}</div>
@@ -710,10 +1004,11 @@
             container.innerHTML = '';
             animeArray.forEach(anime => {
                 const title = anime.title_english || anime.title;
+                const imgUrl = anime.images?.jpg?.image_url || '';
                 const card = document.createElement('div');
                 card.className = 'anime-card';
-                card.innerHTML = `<img src="${anime.images?.jpg?.image_url || ''}"><div class="info-box"><div class="title">${title}</div></div>`;
-                card.onclick = () => loadStreamingLayout(anime.mal_id, title, anime.episodes || 12);
+                card.innerHTML = `<img src="${imgUrl}"><div class="info-box"><div class="title">${title}</div></div>`;
+                card.onclick = () => loadStreamingLayout(anime.mal_id, title, anime.episodes || 12, imgUrl);
                 container.appendChild(card);
             });
         }
@@ -723,10 +1018,11 @@
             container.innerHTML = '';
             animeArray.forEach(anime => {
                 const title = anime.title_english || anime.title;
+                const imgUrl = anime.images?.jpg?.image_url || '';
                 const card = document.createElement('div');
                 card.className = 'anime-card';
-                card.innerHTML = `<img src="${anime.images?.jpg?.image_url || ''}"><div class="info-box"><div class="title">${title}</div></div>`;
-                card.onclick = () => loadStreamingLayout(anime.mal_id, title, anime.episodes || 12);
+                card.innerHTML = `<img src="${imgUrl}"><div class="info-box"><div class="title">${title}</div></div>`;
+                card.onclick = () => loadStreamingLayout(anime.mal_id, title, anime.episodes || 12, imgUrl);
                 container.appendChild(card);
             });
         }
@@ -736,16 +1032,23 @@
             container.innerHTML = '';
             animeArray.forEach((anime, idx) => {
                 const title = anime.title_english || anime.title;
+                const imgUrl = anime.images?.jpg?.image_url || '';
                 const row = document.createElement('div');
                 row.className = 'top10-item';
                 row.innerHTML = `<div class="top10-rank">${idx + 1}</div><div class="top10-details"><div class="top10-title">${title}</div></div>`;
-                row.onclick = () => loadStreamingLayout(anime.mal_id, title, anime.episodes || 12);
+                row.onclick = () => loadStreamingLayout(anime.mal_id, title, anime.episodes || 12, imgUrl);
                 container.appendChild(row);
             });
         }
 
-        async function loadStreamingLayout(malId, titleName, totalEpisodes) {
-            currentMalId = malId;
+        async function loadStreamingLayout(malId, titleName, totalEpisodes, imgUrl = "") {
+            window.currentMalId = malId;
+            window.activeAnimeTitle = titleName;
+            window.activeMaxEpisodes = totalEpisodes;
+            window.activeImgUrl = imgUrl || "https://images.alphacoders.com/134/1344238.png";
+            
+            if(window.updateWatchlistButtonUI) window.updateWatchlistButtonUI();
+
             clearTimeout(window.streamLoadGuard);
             document.getElementById('player-box').innerHTML = '<iframe id="video-iframe" src="" allowfullscreen scrolling="no"></iframe>';
             document.getElementById('main-exploration-hub').style.display = 'none';
@@ -772,7 +1075,7 @@
             if (activeBtn) activeBtn.classList.add('active');
             const iframe = document.getElementById('video-iframe');
             if (!iframe) return;
-            iframe.src = `${MAL_PLAYER_BASE}/${currentMalId}/${epNum}/${currentLanguage}`;
+            iframe.src = `${MAL_PLAYER_BASE}/${window.currentMalId}/${epNum}/${currentLanguage}`;
             
             clearTimeout(window.streamLoadGuard);
             window.streamLoadGuard = setTimeout(() => handleStreamMissingNotice(), 8000);

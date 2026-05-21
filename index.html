@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>dude9anime</title>
+    <style>
+        /* CSS Variables make theme swapping incredibly easy */
+        :root {
+            --bg-color: #050505;
+            --container-bg: #111111;
+            --accent-color: #00ff66; /* Your signature Green */
+            --text-color: #ffffff;
+            --muted-text: #888888;
+        }
+
+        body { 
+            background: var(--bg-color); 
+            color: var(--text-color); 
+            font-family: 'Segoe UI', sans-serif; 
+            margin: 0; 
+            padding: 20px; 
+            text-align: center; 
+            transition: background 0.3s, color 0.3s;
+        }
+
+        /* Header Layout with Settings Gear */
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1000px;
+            margin: 0 auto 10px auto;
+        }
+        h1 { 
+            color: var(--accent-color); 
+            text-shadow: 0 0 10px rgba(0, 255, 102, 0.3); 
+            font-size: 2rem; 
+            margin: 0;
+        }
+        .settings-icon {
+            font-size: 24px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: var(--accent-color);
+            padding: 5px;
+        }
+        p { color: var(--muted-text); margin-top: 0; font-size: 0.9rem; }
+        
+        /* Search Box styling */
+        .search-box { display: flex; max-width: 500px; margin: 20px auto; gap: 10px; padding: 0 10px; }
+        input { flex: 1; padding: 12px; border-radius: 8px; border: 2px solid #222; background: var(--container-bg); color: var(--text-color); font-size: 16px; outline: none; }
+        input:focus { border-color: var(--accent-color); }
+        .search-btn { background: var(--accent-color); color: #000; font-weight: bold; border: none; padding: 0 20px; border-radius: 8px; font-size: 16px; cursor: pointer; }
+
+        /* The Live Video Player Box */
+        .player-container { max-width: 800px; margin: 20px auto; aspect-ratio: 16/9; background: #000; border-radius: 12px; overflow: hidden; border: 2px solid #222; display: none; }
+        iframe { width: 100%; height: 100%; border: none; }
+
+        /* Dynamic Anime Grid Results */
+        .anime-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; max-width: 1000px; margin: 30px auto; padding: 10px; }
+        .anime-card { background: var(--container-bg); border-radius: 8px; overflow: hidden; cursor: pointer; transition: transform 0.2s, border-color 0.2s; border: 1px solid #222; text-align: left; }
+        .anime-card:hover { transform: translateY(-5px); border-color: var(--accent-color); }
+        .anime-card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; background: #222; }
+        .anime-card .title { padding: 10px; font-size: 0.85rem; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-color); }
+
+        /* Dynamic Episode Buttons Box */
+        .episodes-title { margin-top: 30px; display: none; color: var(--accent-color); font-size: 1.2rem; }
+        .episode-list { max-width: 800px; margin: 15px auto; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+        .ep-btn { background: var(--container-bg); color: var(--text-color); border: 1px solid #333; padding: 8px 16px; font-size: 14px; border-radius: 6px; cursor: pointer; min-width: 60px; }
+        .ep-btn:hover, .ep-btn.active { background: var(--accent-color); color: #000; border-color: var(--accent-color); font-weight: bold; }
+
+        /* Settings Modal (Popup Overlay) */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 100; justify-content: center; align-items: center; }
+        .modal-content { background: #151515; border: 2px solid var(--accent-color); padding: 30px; border-radius: 12px; max-width: 300px; width: 80%; text-align: left; position: relative;}
+        .close-btn { position: absolute; top: 10px; right: 15px; font-size: 20px; cursor: pointer; color: var(--muted-text); }
+        .theme-option { margin-bottom: 15px; }
+        .theme-option label { display: block; margin-bottom: 5px; font-size: 14px; color: #aaa; }
+        .theme-option select { width: 100%; padding: 8px; border-radius: 6px; background: #222; color: #fff; border: 1px solid #444; }
+        .save-theme-btn { background: var(--accent-color); color: #000; border: none; padding: 10px; width: 100%; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="header-container">
+        <h1 id="brand-logo">dude9anime</h1>
+        <button class="settings-icon" onclick="toggleModal(true)">⚙️</button>
+    </div>
+    <p>Your Next Anime Adventure Awaits</p>
+
+    <div class="search-box">
+        <input type="text" id="search-input" placeholder="Type anime title...">
+        <button class="search-btn" onclick="searchAnime()">Search</button>
+    </div>
+
+    <div id="results-grid" class="anime-grid"></div>
+
+    <div id="player-box" class="player-container">
+        <iframe id="video-iframe" src="" allowfullscreen scrolling="no"></iframe>
+    </div>
+
+    <h3 id="ep-title" class="episodes-title">Available Episodes</h3>
+    <div id="episode-buttons" class="episode-list"></div>
+
+    <div id="settings-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="toggleModal(false)">&times;</span>
+            <h3 style="margin-top: 0; color: var(--accent-color);">Theme Settings</h3>
+            
+            <div class="theme-option">
+                <label for="accent-picker">Accent Color</label>
+                <select id="accent-picker">
+                    <option value="#00ff66">Neon Green (Default)</option>
+                    <option value="#ff0055">Cyber Pink</option>
+                    <option value="#00ccff">Electric Blue</option>
+                    <option value="#ffcc00">Bright Yellow</option>
+                    <option value="#ffffff">Pure White</option>
+                </select>
+            </div>
+
+            <div class="theme-option">
+                <label for="bg-picker">Background Mode</label>
+                <select id="bg-picker">
+                    <option value="pitch-black">Pitch Black</option>
+                    <option value="dark-gray">Dark Charcoal</option>
+                </select>
+            </div>
+
+            <button class="save-theme-btn" onclick="saveTheme()">Apply Styles</button>
+        </div>
+    </div>
+
+    <script>
+        const ANIKOTO_BASE = "https://anikotoapi.site";
+        const PLAYER_BASE = "https://megaplay.buzz/stream/s-2";
+
+        // --- Theme Engine Setup ---
+        function toggleModal(show) {
+            document.getElementById('settings-modal').style.display = show ? 'flex' : 'none';
+        }
+
+        function saveTheme() {
+            const accent = document.getElementById('accent-picker').value;
+            const bgMode = document.getElementById('bg-picker').value;
+            
+            let bg = "#050505";
+            let container = "#111111";
+            
+            if (bgMode === "dark-gray") {
+                bg = "#1a1a1e";
+                container = "#252529";
+            }
+
+            // Apply modifications live
+            document.documentElement.style.setProperty('--accent-color', accent);
+            document.documentElement.style.setProperty('--bg-color', bg);
+            document.documentElement.style.setProperty('--container-bg', container);
+
+            // Save settings to user storage
+            localStorage.setItem('dude9anime-accent', accent);
+            localStorage.setItem('dude9anime-bg', bg);
+            localStorage.setItem('dude9anime-container', container);
+            
+            toggleModal(false);
+        }
+
+        function loadSavedTheme() {
+            const savedAccent = localStorage.getItem('dude9anime-accent');
+            const savedBg = localStorage.getItem('dude9anime-bg');
+            const savedContainer = localStorage.getItem('dude9anime-container');
+
+            if (savedAccent) document.documentElement.style.setProperty('--accent-color', savedAccent);
+            if (savedBg) document.documentElement.style.setProperty('--bg-color', savedBg);
+            if (savedContainer) document.documentElement.style.setProperty('--container-bg', savedContainer);
+        }
+
+        // --- Stream Platform Engine Logic ---
+        async function loadHomepage() {
+            loadSavedTheme();
+            try {
+                const res = await fetch(`${ANIKOTO_BASE}/recent-anime?page=1&per_page=20`);
+                const data = await res.json();
+                displayAnimeList(data.results || data);
+            } catch (err) {
+                console.error("Home load failed:", err);
+            }
+        }
+
+        async function searchAnime() {
+            const query = document.getElementById('search-input').value.trim();
+            if(!query) return alert("Please type an anime title first!");
+            
+            document.getElementById('results-grid').innerHTML = "<p>Searching database...</p>";
+            
+            try {
+                const res = await fetch(`${ANIKOTO_BASE}/recent-anime?page=1&per_page=20`); 
+                const data = await res.json();
+                const items = data.results || data;
+                const filtered = items.filter(item => item.title.toLowerCase().includes(query.toLowerCase()));
+                
+                if(filtered.length === 0) {
+                    document.getElementById('results-grid').innerHTML = "<p>No results found in recent updates. Try searching another term.</p>";
+                } else {
+                    displayAnimeList(filtered);
+                }
+            } catch (err) {
+                document.getElementById('results-grid').innerHTML = "<p>Error connecting to database.</p>";
+            }
+        }
+
+        function displayAnimeList(animeArray) {
+            const grid = document.getElementById('results-grid');
+            grid.innerHTML = '';
+            grid.style.display = 'grid';
+            
+            animeArray.forEach(anime => {
+                const card = document.createElement('div');
+                card.className = 'anime-card';
+                card.innerHTML = `
+                    <img src="${anime.image || 'https://via.placeholder.com/150x225?text=No+Poster'}" alt="${anime.title}">
+                    <div class="title">${anime.title}</div>
+                `;
+                card.onclick = () => loadSeriesDetails(anime.id);
+                grid.appendChild(card);
+            });
+        }
+
+        async function loadSeriesDetails(seriesId) {
+            try {
+                const res = await fetch(`${ANIKOTO_BASE}/series/${seriesId}`);
+                const data = await res.json();
+                
+                document.getElementById('results-grid').style.display = 'none';
+                document.getElementById('player-box').style.display = 'block';
+                document.getElementById('ep-title').style.display = 'block';
+                
+                const epBox = document.getElementById('episode-buttons');
+                epBox.innerHTML = '';
+
+                data.episodes.forEach((ep, idx) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'ep-btn';
+                    btn.innerText = `${ep.number}`;
+                    
+                    btn.onclick = () => {
+                        document.querySelectorAll('.ep-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        document.getElementById('video-iframe').src = `${PLAYER_BASE}/${ep.episode_embed_id}/sub`;
+                    };
+                    epBox.appendChild(btn);
+                });
+
+                if(data.episodes.length > 0) {
+                    epBox.children[0].click();
+                }
+
+            } catch (err) {
+                alert("Failed to retrieve series details.");
+                console.error(err);
+            }
+        }
+
+        window.onload = loadHomepage;
+    </script>
+</body>
+</html>

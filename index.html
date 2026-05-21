@@ -665,7 +665,7 @@
                 displayScrollFeed(recJson.data || [], 'recommendations-scroller');
             } catch (err) {}
 
-            // RECENTLY ADDED BROADCASTING CATALOGS: Fetches newly uploaded entries/new episodes dynamically
+            // RECENTLY ADDED BROADCASTING CATALOGS
             try {
                 const updateRes = await fetch("https://api.jikan.moe/v4/watch/episodes?limit=16");
                 const updateJson = await updateRes.json();
@@ -720,9 +720,8 @@
                 const response = await fetch(`https://api.jikan.moe/v4/schedules?filter=${targetDayString}&limit=40`);
                 const json = await response.json();
                 const rawAnimeList = json.data || [];
-                const ongoingAnime = rawAnimeList.filter(anime => anime.airing === true || anime.status === "Currently Airing");
                 
-                if(ongoingAnime.length === 0) { 
+                if(rawAnimeList.length === 0) { 
                     scheduleBox.innerHTML = `<p style="padding:10px; font-size:13px; color:#888;">No ongoing broadcasts scheduled.</p>`; 
                     return; 
                 }
@@ -732,7 +731,7 @@
                 // Smart De-duplication Logic
                 const seenMalIds = new Set();
                 
-                ongoingAnime.forEach(anime => {
+                rawAnimeList.forEach(anime => {
                     if (seenMalIds.has(anime.mal_id)) return; // Skip duplicates
                     seenMalIds.add(anime.mal_id);
 
@@ -753,7 +752,6 @@
             } catch (error) { scheduleBox.innerHTML = `<p style="padding:10px; font-size:13px; color:#ff4444;">Failed to sync broadcast calendar.</p>`; }
         }
 
-        // Renders specific watch card models for newly launched episodes with an dynamic visual indicator badge
         function displayRecentlyAddedGrid(episodesArray, elementId) {
             const container = document.getElementById(elementId);
             container.innerHTML = '';
@@ -762,7 +760,6 @@
                 if (!anime) return;
                 const title = anime.title_english || anime.title;
                 
-                // Pull out the newest episode string if present
                 let epNumberDisplay = "";
                 if (item.episodes && item.episodes.length > 0) {
                     epNumberDisplay = `EP ${item.episodes[0].mal_id || item.episodes[0].number}`;

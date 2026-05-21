@@ -198,13 +198,14 @@
 
         .header-clock {
             font-family: monospace;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             color: var(--accent-color);
             background: rgba(0, 255, 102, 0.08);
             padding: 4px 10px;
             border-radius: 6px;
             border: 1px solid rgba(0, 255, 102, 0.2);
             font-weight: bold;
+            white-space: nowrap;
         }
 
         /* Swiper Scroll Rows */
@@ -432,7 +433,7 @@
             <div class="side-panel" id="sidebar-container-block">
                 <div class="section-header" style="margin-top: 0; margin-bottom: 10px;">
                     <h2 class="section-title">Broadcast Schedule</h2>
-                    <div id="live-24h-clock" class="header-clock">00:00:00</div>
+                    <div id="live-24h-clock" class="header-clock">00:00:00 JST</div>
                 </div>
                 
                 <div class="schedule-tabs">
@@ -514,11 +515,17 @@
         function startSystemClock() {
             setInterval(() => {
                 const now = new Date();
-                const hours = String(now.getHours()).padStart(2, '0');
-                const minutes = String(now.getMinutes()).padStart(2, '0');
-                const seconds = String(now.getSeconds()).padStart(2, '0');
+                const jstString = now.toLocaleTimeString("en-US", {
+                    timeZone: "Asia/Tokyo",
+                    hour12: false,
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit"
+                });
                 const clockEl = document.getElementById('live-24h-clock');
-                if (clockEl) clockEl.innerText = `${hours}:${minutes}:${seconds}`;
+                if (clockEl) {
+                    clockEl.innerText = `${jstString} JST`;
+                }
             }, 1000);
         }
 

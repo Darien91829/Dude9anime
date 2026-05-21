@@ -196,6 +196,17 @@
             text-align: left;
         }
 
+        .header-clock {
+            font-family: monospace;
+            font-size: 0.95rem;
+            color: var(--accent-color);
+            background: rgba(0, 255, 102, 0.08);
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: 1px solid rgba(0, 255, 102, 0.2);
+            font-weight: bold;
+        }
+
         /* Swiper Scroll Rows */
         .scroll-row {
             display: flex;
@@ -229,7 +240,6 @@
         .anime-card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; background: #222; }
         .anime-card .info-box { padding: 10px; }
         .anime-card .title { font-size: 0.85rem; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-color); margin-bottom: 4px; }
-        .anime-card .meta-tag { font-size: 0.75rem; color: var(--accent-color); font-weight: 500; }
 
         /* Airing Calendars Day Navigation Switcher Components */
         .schedule-tabs {
@@ -279,7 +289,6 @@
         .schedule-item:last-child { border-bottom: none; }
         .sched-left { text-align: left; max-width: 70%; min-width: 0; cursor: pointer; }
         .sched-title { font-size: 0.9rem; font-weight: bold; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .sched-ep { font-size: 0.75rem; color: var(--muted-text); margin-top: 2px; }
         .sched-time { background: rgba(0, 255, 102, 0.1); color: var(--accent-color); font-size: 0.8rem; font-weight: bold; padding: 5px 10px; border-radius: 6px; font-family: monospace; }
 
         /* Top 10 Columns Blocks */
@@ -423,6 +432,7 @@
             <div class="side-panel" id="sidebar-container-block">
                 <div class="section-header" style="margin-top: 0; margin-bottom: 10px;">
                     <h2 class="section-title">Broadcast Schedule</h2>
+                    <div id="live-24h-clock" class="header-clock">00:00:00</div>
                 </div>
                 
                 <div class="schedule-tabs">
@@ -493,7 +503,6 @@
 
     <script>
         const MAL_PLAYER_BASE = "https://megaplay.buzz/stream/mal";
-        const ANIKOTO_PLAYER_BASE = "https://megaplay.buzz/stream/s-2"; 
 
         let currentEpisodeIndex = 1;
         let currentLanguage = 'sub';
@@ -501,8 +510,17 @@
         let selectedBgValue = "pitch-black";
         let rVal = 0, gVal = 255, bVal = 102;
         let activeScheduleDay = 'today';
-        let useAnikotoFallback = false;
-        let anikotoEpisodeEmbedIds = []; 
+
+        function startSystemClock() {
+            setInterval(() => {
+                const now = new Date();
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const seconds = String(now.getSeconds()).padStart(2, '0');
+                const clockEl = document.getElementById('live-24h-clock');
+                if (clockEl) clockEl.innerText = `${hours}:${minutes}:${seconds}`;
+            }, 1000);
+        }
 
         function openBottomSheet() {
             document.getElementById('sheet-overlay').style.display = 'block';
@@ -586,6 +604,7 @@
         }
 
         function homeReturnReset() {
+            clearTimeout(window.streamLoadGuard);
             document.getElementById('stream-dashboard-box').style.display = 'none';
             document.getElementById('main-exploration-hub').style.display = 'none';
             document.getElementById('header-search-engine').style.display = 'none';
@@ -605,7 +624,9 @@
                     displayGridFeed(dataset.slice(10, 22), 'results-grid');
                     displayTop10Sidebar(dataset.slice(0, 10));
                 }
-            } catch (err) { document.getElementById('results-grid').innerHTML = "<p>Network database offline.</p>"; }
+            } catch (err) { 
+                document.getElementById('results-grid').innerHTML = "<p>Network database offline.</p>"; 
+            }
         }
 
         async function triggerCatalogSearch(fromHeader = false) {
@@ -642,16 +663,22 @@
             const scheduleBox = document.getElementById('schedule-box');
             scheduleBox.innerHTML = '<p style="padding:10px; font-size:13px; color:#888;">Updating timeline...</p>';
             const weekdays = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+            
             let currentDayIndex = new Date().getDay();
             if (dayMode === 'yesterday') currentDayIndex = (currentDayIndex - 1 + 7) % 7;
             else if (dayMode === 'tomorrow') currentDayIndex = (currentDayIndex + 1) % 7;
             const targetDayString = weekdays[currentDayIndex];
+
             try {
                 const response = await fetch(`https://api.jikan.moe/v4/schedules?filter=${targetDayString}&limit=25`);
                 const json = await response.json();
                 const rawAnimeList = json.data || [];
                 const ongoingAnime = rawAnimeList.filter(anime => anime.airing === true || anime.status === "Currently Airing");
-                if(ongoingAnime.length === 0) { scheduleBox.innerHTML = `<p style="padding:10px; font-size:13px; color:#888;">No ongoing broadcasts scheduled.</p>`; return; }
+                
+                if(ongoingAnime.length === 0) { 
+                    scheduleBox.innerHTML = `<p style="padding:10px; font-size:13px; color:#888;">No ongoing broadcasts scheduled.</p>`; 
+                    return; 
+                }
                 scheduleBox.innerHTML = '';
                 ongoingAnime.forEach(anime => {
                     const title = anime.title_english || anime.title;
@@ -666,7 +693,9 @@
                     `;
                     scheduleBox.appendChild(div);
                 });
-            } catch (error) { scheduleBox.innerHTML = `<p style="padding:10px; font-size:13px; color:#ff4444;">Failed to sync broadcast calendar.</p>`; }
+            } catch (error) { 
+                scheduleBox.innerHTML = `<p style="padding:10px; font-size:13px; color:#ff4444;">Failed to sync broadcast calendar.</p>`; 
+            }
         }
 
         function displayScrollFeed(animeArray, elementId) {
@@ -710,8 +739,7 @@
 
         async function loadStreamingLayout(malId, titleName, totalEpisodes) {
             currentMalId = malId;
-            useAnikotoFallback = false;
-            anikotoEpisodeEmbedIds = [];
+            clearTimeout(window.streamLoadGuard);
             document.getElementById('player-box').innerHTML = '<iframe id="video-iframe" src="" allowfullscreen scrolling="no"></iframe>';
             document.getElementById('main-exploration-hub').style.display = 'none';
             document.getElementById('stream-dashboard-box').style.display = 'block';
@@ -738,6 +766,7 @@
             const iframe = document.getElementById('video-iframe');
             if (!iframe) return;
             iframe.src = `${MAL_PLAYER_BASE}/${currentMalId}/${epNum}/${currentLanguage}`;
+            
             clearTimeout(window.streamLoadGuard);
             window.streamLoadGuard = setTimeout(() => handleStreamMissingNotice(), 8000);
         }
@@ -769,7 +798,10 @@
             }
         });
 
-        window.onload = loadSavedTheme;
+        window.onload = function() {
+            loadSavedTheme();
+            startSystemClock();
+        };
     </script>
 </body>
 </html>

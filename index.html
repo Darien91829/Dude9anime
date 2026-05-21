@@ -51,6 +51,10 @@
         input:focus { border-color: var(--accent-color); }
         .search-btn { background: var(--accent-color); color: #000; font-weight: bold; border: none; padding: 0 20px; border-radius: 8px; font-size: 16px; cursor: pointer; }
 
+        /* Quick Tiles section if API errors out */
+        .fallback-section { max-width: 1000px; margin: 20px auto; text-align: left; padding: 0 10px; }
+        .fallback-title { color: var(--accent-color); font-size: 1.1rem; margin-bottom: 10px; font-weight: bold; }
+
         /* The Live Video Player Box */
         .player-container { max-width: 800px; margin: 20px auto; aspect-ratio: 16/9; background: #000; border-radius: 12px; overflow: hidden; border: 2px solid #222; display: none; }
         iframe { width: 100%; height: 100%; border: none; }
@@ -61,7 +65,7 @@
         .audio-btn.active { background: var(--accent-color); color: #000; border-color: var(--accent-color); }
 
         /* Dynamic Anime Grid Results */
-        .anime-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; max-width: 1000px; margin: 30px auto; padding: 10px; }
+        .anime-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; max-width: 1000px; margin: 20px auto; padding: 10px; }
         .anime-card { background: var(--container-bg); border-radius: 8px; overflow: hidden; cursor: pointer; transition: transform 0.2s, border-color 0.2s; border: 1px solid #222; text-align: left; }
         .anime-card:hover { transform: translateY(-5px); border-color: var(--accent-color); }
         .anime-card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; background: #222; }
@@ -73,14 +77,19 @@
         .ep-btn { background: var(--container-bg); color: var(--text-color); border: 1px solid #333; padding: 8px 16px; font-size: 14px; border-radius: 6px; cursor: pointer; min-width: 60px; }
         .ep-btn:hover, .ep-btn.active { background: var(--accent-color); color: #000; border-color: var(--accent-color); font-weight: bold; }
 
-        /* Settings Modal */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 100; justify-content: center; align-items: center; }
-        .modal-content { background: #151515; border: 2px solid var(--accent-color); padding: 30px; border-radius: 12px; max-width: 300px; width: 80%; text-align: left; position: relative;}
-        .close-btn { position: absolute; top: 10px; right: 15px; font-size: 20px; cursor: pointer; color: var(--muted-text); }
-        .theme-option { margin-bottom: 15px; }
-        .theme-option label { display: block; margin-bottom: 5px; font-size: 14px; color: #aaa; }
-        .theme-option select { width: 100%; padding: 8px; border-radius: 6px; background: #222; color: #fff; border: 1px solid #444; }
-        .save-theme-btn { background: var(--accent-color); color: #000; border: none; padding: 10px; width: 100%; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        /* Settings Modal Customizations */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 100; justify-content: center; align-items: center; }
+        .modal-content { background: #121214; border: 2px solid var(--accent-color); padding: 25px; border-radius: 16px; max-width: 320px; width: 85%; text-align: left; position: relative; box-shadow: 0 0 30px rgba(0,0,0,0.6); }
+        .close-btn { position: absolute; top: 12px; right: 18px; font-size: 22px; cursor: pointer; color: var(--muted-text); }
+        
+        .theme-section-title { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted-text); margin: 15px 0 8px 0; font-weight: bold; }
+        
+        /* NO DROP-DOWNS: Custom Color Grid Options */
+        .custom-options-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 15px; }
+        .option-tile { background: #1c1c21; border: 2px solid #2d2d35; padding: 10px; border-radius: 8px; text-align: center; cursor: pointer; font-size: 0.85rem; font-weight: 500; color: #eee; transition: all 0.2s; }
+        .option-tile.selected { border-color: var(--accent-color); background: rgba(0, 255, 102, 0.05); color: #fff; }
+        
+        .save-theme-btn { background: var(--accent-color); color: #000; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 15px; font-size: 15px; }
     </style>
 </head>
 <body>
@@ -92,8 +101,30 @@
     <p>Your Next Anime Adventure Awaits</p>
 
     <div class="search-box">
-        <input type="text" id="search-input" placeholder="Type anime title...">
+        <input type="text" id="search-input" placeholder="Type anime title or numeric MAL ID...">
         <button class="search-btn" onclick="searchAnime()">Search</button>
+    </div>
+
+    <div class="fallback-section" id="quick-directory">
+        <div class="fallback-title">⚡ Quick Launch Library</div>
+        <div class="anime-grid" style="margin: 0; padding: 0;">
+            <div class="anime-card" onclick="loadMalFallback('21', 'One Piece')">
+                <img src="https://cdn.myanimelist.net/images/anime/1244/138851.jpg" alt="One Piece">
+                <div class="title">One Piece</div>
+            </div>
+            <div class="anime-card" onclick="loadMalFallback('5114', 'Fullmetal Alchemist')">
+                <img src="https://cdn.myanimelist.net/images/anime/1208/94745.jpg" alt="Fullmetal Alchemist">
+                <div class="title">Fullmetal Alchemist</div>
+            </div>
+            <div class="anime-card" onclick="loadMalFallback('1735', 'Naruto Shippuden')">
+                <img src="https://cdn.myanimelist.net/images/anime/1565/111305.jpg" alt="Naruto Shippuden">
+                <div class="title">Naruto Shippuden</div>
+            </div>
+            <div class="anime-card" onclick="loadMalFallback('269', 'Bleach')">
+                <img src="https://cdn.myanimelist.net/images/anime/3/40451.jpg" alt="Bleach">
+                <div class="title">Bleach</div>
+            </div>
+        </div>
     </div>
 
     <div id="results-grid" class="anime-grid"></div>
@@ -113,99 +144,133 @@
     <div id="settings-modal" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="toggleModal(false)">&times;</span>
-            <h3 style="margin-top: 0; color: var(--accent-color);">Theme Settings</h3>
+            <h3 style="margin-top: 0; color: var(--accent-color); font-size: 1.3rem;">Theme Settings</h3>
             
-            <div class="theme-option">
-                <label for="accent-picker">Accent Color</label>
-                <select id="accent-picker">
-                    <option value="#00ff66">Neon Green (Default)</option>
-                    <option value="#ff0055">Cyber Pink</option>
-                    <option value="#00ccff">Electric Blue</option>
-                    <option value="#ffcc00">Bright Yellow</option>
-                    <option value="#ffffff">Pure White</option>
-                </select>
+            <div class="theme-section-title">Accent Color</div>
+            <div class="custom-options-grid" id="accent-tiles-container">
+                <div class="option-tile selected" data-value="#00ff66" onclick="selectTile('accent', this)">Neon Green</div>
+                <div class="option-tile" data-value="#ff0055" onclick="selectTile('accent', this)">Cyber Pink</div>
+                <div class="option-tile" data-value="#00ccff" onclick="selectTile('accent', this)">Electric Blue</div>
+                <div class="option-tile" data-value="#ffcc00" onclick="selectTile('accent', this)">Neon Yellow</div>
             </div>
 
-            <div class="theme-option">
-                <label for="bg-picker">Background Mode</label>
-                <select id="bg-picker">
-                    <option value="pitch-black">Pitch Black</option>
-                    <option value="dark-gray">Dark Charcoal</option>
-                </select>
+            <div class="theme-section-title">Background Mode</div>
+            <div class="custom-options-grid" id="bg-tiles-container">
+                <div class="option-tile selected" data-value="pitch-black" onclick="selectTile('bg', this)">Pitch Black</div>
+                <div class="option-tile" data-value="dark-gray" onclick="selectTile('bg', this)">Dark Charcoal</div>
             </div>
 
-            <button class="save-theme-btn" onclick="saveTheme()">Apply Styles</button>
+            <button class="save-theme-btn" onclick="saveTheme()">Apply Changes</button>
         </div>
     </div>
 
     <script>
         const ANIKOTO_BASE = "https://anikotoapi.site";
         const PLAYER_BASE = "https://megaplay.buzz/stream/s-2";
+        const MAL_PLAYER_BASE = "https://megaplay.buzz/stream/mal";
 
-        // State Trackers
+        // State trackers
         let currentEpisodesList = [];
         let currentEpisodeIndex = 0;
-        let currentLanguage = 'sub'; [span_7](start_span)// Default language setting[span_7](end_span)
+        let currentLanguage = 'sub';
+        let isMalFallback = false;
+        let fallbackMalId = "";
+
+        // Temporary storage values for modal clicks
+        let selectedAccentValue = "#00ff66";
+        let selectedBgValue = "pitch-black";
 
         function toggleModal(show) {
             document.getElementById('settings-modal').style.display = show ? 'flex' : 'none';
         }
 
-        function saveTheme() {
-            const accent = document.getElementById('accent-picker').value;
-            const bgMode = document.getElementById('bg-picker').value;
-            let bg = "#050505", container = "#111111";
-            
-            if (bgMode === "dark-gray") { bg = "#1a1a1e"; container = "#252529"; }
+        // Custom tile selector method replacing the mobile drop-down menus
+        function selectTile(type, element) {
+            const containerId = type === 'accent' ? 'accent-tiles-container' : 'bg-tiles-container';
+            document.querySelectorAll(`#${containerId} .option-tile`).forEach(tile => tile.classList.remove('selected'));
+            element.classList.add('selected');
 
-            document.documentElement.style.setProperty('--accent-color', accent);
+            if (type === 'accent') {
+                selectedAccentValue = element.getAttribute('data-value');
+            } else {
+                selectedBgValue = element.getAttribute('data-value');
+            }
+        }
+
+        function saveTheme() {
+            let bg = "#050505", container = "#111111";
+            if (selectedBgValue === "dark-gray") { bg = "#1a1a1e"; container = "#252529"; }
+
+            document.documentElement.style.setProperty('--accent-color', selectedAccentValue);
             document.documentElement.style.setProperty('--bg-color', bg);
             document.documentElement.style.setProperty('--container-bg', container);
 
-            localStorage.setItem('dude9anime-accent', accent);
-            localStorage.setItem('dude9anime-bg', bg);
-            localStorage.setItem('dude9anime-container', container);
+            localStorage.setItem('dude9anime-accent', selectedAccentValue);
+            localStorage.setItem('dude9anime-bg', selectedBgValue);
+            
             toggleModal(false);
         }
 
         function loadSavedTheme() {
             const savedAccent = localStorage.getItem('dude9anime-accent');
-            const savedBg = localStorage.getItem('dude9anime-bg');
-            const savedContainer = localStorage.getItem('dude9anime-container');
-            if (savedAccent) document.documentElement.style.setProperty('--accent-color', savedAccent);
-            if (savedBg) document.documentElement.style.setProperty('--bg-color', savedBg);
-            if (savedContainer) document.documentElement.style.setProperty('--container-bg', savedContainer);
+            const savedBgMode = localStorage.getItem('dude9anime-bg');
+
+            if (savedAccent) {
+                selectedAccentValue = savedAccent;
+                document.documentElement.style.setProperty('--accent-color', savedAccent);
+                document.querySelectorAll('#accent-tiles-container .option-tile').forEach(tile => {
+                    tile.classList.toggle('selected', tile.getAttribute('data-value') === savedAccent);
+                });
+            }
+            if (savedBgMode) {
+                selectedBgValue = savedBgMode;
+                let bg = "#050505", container = "#111111";
+                if (savedBgMode === "dark-gray") { bg = "#1a1a1e"; container = "#252529"; }
+                document.documentElement.style.setProperty('--bg-color', bg);
+                document.documentElement.style.setProperty('--container-bg', container);
+                document.querySelectorAll('#bg-tiles-container .option-tile').forEach(tile => {
+                    tile.classList.toggle('selected', tile.getAttribute('data-value') === savedBgMode);
+                });
+            }
         }
 
         async function loadHomepage() {
             loadSavedTheme();
             try {
-                const res = await fetch(`${ANIKOTO_BASE}/recent-anime?page=1&per_page=20`); [span_8](start_span)//[span_8](end_span)
+                const res = await fetch(`${ANIKOTO_BASE}/recent-anime?page=1&per_page=20`);
+                if (!res.ok) throw new Error("CORS or Server restriction active.");
                 const data = await res.json();
                 displayAnimeList(data.results || data);
             } catch (err) {
-                console.error("Home load failed:", err);
+                console.log("Using direct fallback directory mode.");
             }
         }
 
         async function searchAnime() {
             const query = document.getElementById('search-input').value.trim();
-            if(!query) return alert("Please type an anime title first!");
-            document.getElementById('results-grid').innerHTML = "<p>Searching database...</p>";
+            if(!query) return alert("Please type an anime title or MAL ID first!");
+            
+            if (/^\d+$/.test(query)) {
+                loadMalFallback(query, `Anime ID: ${query}`);
+                return;
+            }
+
+            document.getElementById('results-grid').innerHTML = "<p>Searching database updates...</p>";
             
             try {
-                const res = await fetch(`${ANIKOTO_BASE}/recent-anime?page=1&per_page=20`); [span_9](start_span)//[span_9](end_span)
+                const res = await fetch(`${ANIKOTO_BASE}/recent-anime?page=1&per_page=20`);
                 const data = await res.json();
                 const items = data.results || data;
                 const filtered = items.filter(item => item.title.toLowerCase().includes(query.toLowerCase()));
                 
                 if(filtered.length === 0) {
-                    document.getElementById('results-grid').innerHTML = "<p>No results found. Try searching another term.</p>";
+                    document.getElementById('results-grid').innerHTML = "<p>No recent update found. Type a numeric ID like 21 or 5114!</p>";
                 } else {
+                    document.getElementById('quick-directory').style.display = 'none';
                     displayAnimeList(filtered);
                 }
             } catch (err) {
-                document.getElementById('results-grid').innerHTML = "<p>Error connecting to database.</p>";
+                document.getElementById('results-grid').innerHTML = "<p style='color:#ff0055;'>Database server restricted. Please use the Quick Launch collection or type a numeric MAL ID.</p>";
             }
         }
 
@@ -227,12 +292,14 @@
         }
 
         async function loadSeriesDetails(seriesId) {
+            isMalFallback = false;
             try {
-                const res = await fetch(`${ANIKOTO_BASE}/series/${seriesId}`); [span_10](start_span)[span_11](start_span)//[span_10](end_span)[span_11](end_span)
+                const res = await fetch(`${ANIKOTO_BASE}/series/${seriesId}`);
                 const data = await res.json();
                 
-                currentEpisodesList = data.episodes; // Cache list globally for auto-next sequencing
+                currentEpisodesList = data.episodes;
                 
+                document.getElementById('quick-directory').style.display = 'none';
                 document.getElementById('results-grid').style.display = 'none';
                 document.getElementById('player-box').style.display = 'block';
                 document.getElementById('audio-toggles').style.display = 'flex';
@@ -244,13 +311,41 @@
                     playEpisode(0);
                 }
             } catch (err) {
-                alert("Failed to retrieve series details.");
+                alert("Could not pull direct stream catalog config.");
             }
+        }
+
+        function loadMalFallback(malId, titleName) {
+            isMalFallback = true;
+            fallbackMalId = malId;
+            
+            document.getElementById('quick-directory').style.display = 'none';
+            document.getElementById('results-grid').style.display = 'none';
+            document.getElementById('player-box').style.display = 'block';
+            document.getElementById('audio-toggles').style.display = 'flex';
+            document.getElementById('ep-title').style.display = 'block';
+            document.getElementById('ep-title').innerText = `Watching: ${titleName}`;
+            
+            const epBox = document.getElementById('episode-buttons');
+            epBox.innerHTML = '';
+
+            // Generate an expansive block list of episode selector points for fallback mode
+            for (let i = 1; i <= 25; i++) {
+                const btn = document.createElement('button');
+                btn.className = 'ep-btn';
+                btn.id = `ep-choice-${i}`;
+                btn.innerText = `${i}`;
+                btn.onclick = () => playMalEpisode(i);
+                epBox.appendChild(btn);
+            }
+            
+            playMalEpisode(1);
         }
 
         function buildEpisodeButtons() {
             const epBox = document.getElementById('episode-buttons');
             epBox.innerHTML = '';
+            document.getElementById('ep-title').innerText = "Available Episodes";
 
             currentEpisodesList.forEach((ep, idx) => {
                 const btn = document.createElement('button');
@@ -267,40 +362,50 @@
             const episodeData = currentEpisodesList[index];
             if (!episodeData) return;
 
-            // Update UI Active states
             document.querySelectorAll('.ep-btn').forEach(b => b.classList.remove('active'));
             const activeBtn = document.getElementById(`ep-choice-${index}`);
             if (activeBtn) activeBtn.classList.add('active');
 
-            [span_12](start_span)[span_13](start_span)// Inject language selection dynamically into player endpoint[span_12](end_span)[span_13](end_span)
-            const streamUrl = `${PLAYER_BASE}/${episodeData.episode_embed_id}/${currentLanguage}`; [span_14](start_span)[span_15](start_span)//[span_14](end_span)[span_15](end_span)
+            const streamUrl = `${PLAYER_BASE}/${episodeData.episode_embed_id}/${currentLanguage}`;
             document.getElementById('video-iframe').src = streamUrl;
         }
 
-        [span_16](start_span)// Sub and Dub Selector Execution Engine[span_16](end_span)
+        function playMalEpisode(epNum) {
+            currentEpisodeIndex = epNum;
+            document.querySelectorAll('.ep-btn').forEach(b => b.classList.remove('active'));
+            const activeBtn = document.getElementById(`ep-choice-${epNum}`);
+            if (activeBtn) activeBtn.classList.add('active');
+
+            const streamUrl = `${MAL_PLAYER_BASE}/${fallbackMalId}/${epNum}/${currentLanguage}`;
+            document.getElementById('video-iframe').src = streamUrl;
+        }
+
         function setLanguage(lang) {
             currentLanguage = lang;
             document.getElementById('sub-btn').classList.toggle('active', lang === 'sub');
             document.getElementById('dub-btn').classList.toggle('active', lang === 'dub');
-            playEpisode(currentEpisodeIndex); // Re-fire player configuration update
+            if (isMalFallback) {
+                playMalEpisode(currentEpisodeIndex);
+            } else {
+                playEpisode(currentEpisodeIndex);
+            }
         }
 
-        [span_17](start_span)// --- POSTMESSAGE LISTENER (THE AUTO-NEXT ENGINE) ---[span_17](end_span)
+        // Auto-Next Message Frame Event Listener
         window.addEventListener("message", function (event) {
             let data = event.data;
             if (typeof data === "string") {
                 try { data = JSON.parse(data); } catch (e) { return; }
             }
 
-            [span_18](start_span)// Listen for the 'complete' signal originating from MegaPlay[span_18](end_span)
-            [span_19](start_span)if (data && data.event === "complete") { //[span_19](end_span)
-                console.log("Episode ended! Auto-triggering next video stream sequence.");
-                const nextIndex = currentEpisodeIndex + 1;
-                
-                if (nextIndex < currentEpisodesList.length) {
-                    playEpisode(nextIndex); // Seamlessly load the next episode!
+            if (data && data.event === "complete") {
+                if (isMalFallback) {
+                    playMalEpisode(currentEpisodeIndex + 1);
                 } else {
-                    alert("You've reached the final episode of this series!");
+                    const nextIndex = currentEpisodeIndex + 1;
+                    if (nextIndex < currentEpisodesList.length) {
+                        playEpisode(nextIndex);
+                    }
                 }
             }
         });
